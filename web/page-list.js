@@ -14,17 +14,17 @@
   // 一覧が使う色。値そのものはダッシュボードの :root と同じだが、Shadow DOM は
   // 外の :root を継承しない箇所があるため、ここを唯一の出どころにしておく
   const VARS = `
-    --line: #e5e5ea;
-    --chip: #f0f3f7;
-    --blue: #0a4695;
-    --blue-deep: #0e0d6a;
-    --blue-soft: #eaf2fb;
-    --sub: #45454d;
-    --ink-faint: #6b6b73;
+    --line: #D7CBB7;
+    --chip: #F1E4CC;
+    --blue: #B6391D;
+    --blue-deep: #6F1B0F;
+    --blue-soft: #FCE7DD;
+    --sub: #29333E;
+    --ink-faint: #707574;
     --accent: var(--blue);
     --accent-soft: var(--blue-soft);
-    --star: #f0b21f;
-    --gold-deep: #8a5a00;
+    --star: #C4A06C;
+    --gold-deep: #6F4D21;
   `;
 
   const CSS = `
@@ -58,16 +58,16 @@
       padding: .05rem .4rem; border-radius: .6rem;
       background: var(--blue-soft); color: var(--blue-deep);
     }
-    .chip[data-tone="mid"] { background: #e7f1fa; color: var(--blue); }
-    .chip[data-tone="bright"] { background: #e7f8fd; color: #04658d; }
-    .chip[data-tone="soft"] { background: #f0f3f7; color: var(--sub); }
+    .chip[data-tone="mid"] { background: #FCE7DD; color: var(--blue); }
+    .chip[data-tone="bright"] { background: #DDF7F8; color: #087C88; }
+    .chip[data-tone="soft"] { background: #F1E4CC; color: var(--sub); }
     /* 新着（まだ開いていない更新）。色だけに頼らず「新着」の2文字も添える */
     .new-flag {
       padding: .05rem .4rem; border-radius: .6rem;
-      background: #f7e2a8; color: var(--gold-deep);
+      background: #F8EBD2; color: var(--gold-deep);
       font-size: .66rem; font-weight: 700; letter-spacing: .04em;
     }
-    .item-wrap.is-new .item { background: #fff8e6; }
+    .item-wrap.is-new .item { background: #FFF3ED; }
     /* ☆の見た目。位置指定を分けてあるので、トップ画面の行（.row-wrap）も同じ見た目を使える */
     .star {
       width: 2.25rem; height: 2.25rem;
@@ -95,7 +95,7 @@
     /* 触って操作する環境ではホバーが残るので、マウスのある環境だけに限る */
     @media (hover: hover) {
       .item:hover { background: var(--chip); }
-      .item-wrap.is-new .item:hover { background: #fdf0cd; }
+      .item-wrap.is-new .item:hover { background: #FFE8DD; }
       .star:hover { background: var(--chip); color: var(--star); }
     }
     @media (prefers-reduced-motion: reduce) {

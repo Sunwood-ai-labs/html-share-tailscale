@@ -10,7 +10,7 @@
 <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="theme-color" content="#0a4695">
+<meta name="theme-color" content="#161C26">
 <style>
 :root {
   /* 上バーの配色。青を保ったまま、右下へ向かって白へ抜ける。
@@ -336,7 +336,8 @@ footer {
   <div class="topbar-inner">
     <a class="brand" href="/app/index.html" title="HTML共有くんへ戻る">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5.2 8.2 12l6.8 6.8"/></svg>
-      <span class="label">インボックス</span>
+      <img class="brand-mark" src="/icons/icon-192.png" alt="" width="36" height="36">
+      <span class="brand-copy"><span class="label">インボックス</span><span class="brand-sub">TAILNET INBOX</span></span>
     </a>
     <span class="brand-meta" id="summary">読み込み中</span>
     <div class="topbar-actions">
@@ -349,6 +350,15 @@ footer {
 
 <main>
   <div id="toast" role="status"></div>
+
+  <section class="review-hero" aria-labelledby="review-title">
+    <div>
+      <p class="hero-kicker"><span class="hero-signal-dot"></span>INBOX / TAILNET</p>
+      <h1 id="review-title">作業を、次の画面へ渡す。</h1>
+      <p>スマホから依頼を置き、PCのエージェントへ返します。</p>
+    </div>
+    <img src="/icons/icon-192.png" alt="" width="96" height="96">
+  </section>
 
   <div class="section-head"><span>Claudeへの依頼</span><span class="count gold" id="request-count">0</span></div>
   <form class="compose" id="compose">
@@ -647,8 +657,140 @@ footer {
       toast(error.message);
     } finally {
       busy = false; send.disabled = false; field.disabled = false;
-    }
   }
+}
+
+/* ── Tailnet Rock visual system ─────────────────────────────── */
+:root {
+  color-scheme: light;
+  --paper: #E9D9B6;
+  --paper-2: #E2CFAD;
+  --rock-ink: #161C26;
+  --rock-ink-2: #29333E;
+  --rock-vermilion: #B6391D;
+  --rock-vermilion-deep: #6F1B0F;
+  --rock-cyan: #1BC3D3;
+  --rock-cyan-deep: #087C88;
+  --rock-gold: #C4A06C;
+  --safe-top: var(--rock-ink);
+  --ink: var(--rock-ink);
+  --sub: var(--rock-ink-2);
+  --mut: #707574;
+  --line: #D7CBB7;
+  --soft: #F7F0E2;
+  --white: #FFFDF8;
+  --blue-deep: var(--rock-vermilion-deep);
+  --blue: var(--rock-vermilion);
+  --blue-mid: var(--rock-vermilion-deep);
+  --blue-bright: var(--rock-cyan);
+  --blue-soft: #FCE7DD;
+  --blue-line: #D9B7A4;
+  --blue-grad: linear-gradient(135deg, var(--rock-ink), var(--rock-ink-2) 62%, var(--rock-vermilion));
+  --gold: var(--rock-gold);
+  --gold-deep: #6F4D21;
+  --gold-soft: #F8EBD2;
+  --success: #176B42;
+  --success-soft: #E8F6EF;
+  --danger: var(--rock-vermilion-deep);
+}
+html, body { background: var(--soft); }
+body { font-family: "Avenir Next", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif; }
+:where(button, a, input, select, textarea):focus-visible { outline: 3px solid var(--rock-cyan); outline-offset: 3px; }
+.topbar {
+  background: var(--rock-ink);
+  border-bottom: 1px solid rgba(233, 217, 182, .16);
+  box-shadow: 0 10px 26px rgba(22, 28, 38, .18);
+  isolation: isolate;
+}
+.topbar::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--rock-vermilion) 34%, var(--rock-cyan) 68%, transparent);
+}
+.topbar-inner { height: 4rem; }
+.brand { margin-left: 0; min-height: 2.75rem; padding: .25rem .4rem; gap: .55rem; border-radius: .8rem; color: var(--paper); }
+.brand:hover { background: rgba(233, 217, 182, .10); }
+.brand:active { background: rgba(233, 217, 182, .16); }
+.brand svg { width: 1rem; height: 1rem; opacity: .72; }
+.brand-mark { width: 2.25rem; height: 2.25rem; flex: none; object-fit: contain; padding: .2rem; border-radius: .72rem; background: var(--paper); }
+.brand-copy { display: grid; gap: .05rem; text-align: left; }
+.brand .label { font-size: .9rem; font-weight: 800; letter-spacing: .04em; }
+.brand-sub { color: rgba(233, 217, 182, .62); font-size: .58rem; font-weight: 700; letter-spacing: .14em; line-height: 1; }
+.brand-meta { color: rgba(233, 217, 182, .66); }
+.tb-btn { width: 2.75rem; height: 2.75rem; border-color: rgba(233, 217, 182, .24); border-radius: .85rem; background: rgba(233, 217, 182, .08); color: var(--paper); }
+.tb-btn:hover { border-color: rgba(27, 195, 211, .78); background: rgba(27, 195, 211, .12); }
+main { background: var(--soft); }
+.review-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 10rem;
+  margin: .2rem 0 2rem;
+  overflow: hidden;
+  padding: 1.5rem clamp(1.1rem, 3vw, 2rem);
+  border: 1px solid rgba(233, 217, 182, .16);
+  border-radius: 1.25rem;
+  background: var(--rock-ink);
+  color: var(--paper);
+  box-shadow: 0 18px 36px rgba(22, 28, 38, .14);
+  isolation: isolate;
+}
+.review-hero::before { content: ""; position: absolute; width: 18rem; height: 18rem; top: -10rem; right: -4rem; z-index: -1; border-radius: 50%; background: radial-gradient(circle, rgba(182, 57, 29, .5), transparent 68%); }
+.review-hero > div { position: relative; z-index: 1; }
+.review-hero .hero-kicker { display: flex; align-items: center; gap: .5rem; margin: 0 0 .6rem; color: var(--rock-cyan); font-size: .66rem; font-weight: 800; letter-spacing: .16em; }
+.hero-signal-dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--rock-cyan); box-shadow: 0 0 0 .25rem rgba(27, 195, 211, .16); }
+.review-hero h1 { margin: 0; color: var(--paper); font-size: clamp(1.65rem, 4vw, 2.7rem); line-height: 1.08; letter-spacing: -.055em; }
+.review-hero p:last-child { margin: .7rem 0 0; color: rgba(233, 217, 182, .68); font-size: .82rem; }
+.review-hero > img { width: 6rem; height: 6rem; object-fit: contain; filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .24)); }
+.section-head { color: var(--rock-vermilion); }
+.section-head.later { border-color: var(--line); }
+.count { color: var(--rock-vermilion-deep); background: var(--blue-soft); }
+.count.gold { color: var(--gold-deep); background: var(--gold-soft); }
+.compose, .card { border-color: var(--line); border-radius: 1rem; background: var(--white); box-shadow: 0 1px 2px rgba(22, 28, 38, .04), 0 14px 30px rgba(22, 28, 38, .06); }
+.compose { padding: 1rem; }
+.compose textarea, .compose-target, .actions input { border-color: var(--line); background: #FFFEFA; }
+.compose textarea:focus, .compose-target:focus, .actions input:focus { outline: 3px solid rgba(27, 195, 211, .38); border-color: var(--rock-cyan); }
+.compose .target-open:hover, .compose .target-option:hover { background: #FFF3ED; color: var(--rock-vermilion); }
+.target-list { border-color: var(--line); background: var(--white); box-shadow: 0 14px 30px rgba(22, 28, 38, .12); }
+.target-badge { color: var(--rock-vermilion-deep); background: var(--blue-soft); }
+.compose button, .approve { background: var(--rock-vermilion); }
+.compose button:hover, .approve:hover { background: #CC492A; }
+.send { background: var(--rock-ink-2); }
+.card { border-top-width: 3px; }
+.card.waiting { border-top-color: var(--rock-gold); }
+.card.answered { border-top-color: var(--rock-cyan); }
+.card.request.waiting { border-top-color: var(--rock-vermilion); }
+.recommendation { border-left-color: var(--rock-vermilion); color: var(--rock-vermilion-deep); background: var(--blue-soft); }
+.waiting-mac { color: var(--rock-vermilion); }
+.discard.armed { border-color: var(--rock-gold); color: var(--gold-deep); background: var(--gold-soft); }
+.history details { border-color: var(--line); }
+.empty strong { color: var(--rock-vermilion-deep); }
+footer { background: var(--soft); color: var(--mut); }
+
+@media (prefers-contrast: more) {
+  .compose, .card, .review-hero, .tb-btn { border-width: 2px; }
+}
+@media (max-width: 46rem) {
+  .topbar { background: var(--rock-ink); }
+  .topbar-inner { height: 3.75rem; gap: .35rem; }
+  .brand-mark { width: 2.15rem; height: 2.15rem; }
+  .brand-sub, .brand-meta { display: none; }
+  .brand .label { font-size: .84rem; }
+  .tb-btn { width: 2.75rem; height: 2.75rem; }
+  .review-hero { min-height: 9rem; margin-bottom: 1.5rem; padding: 1.25rem; border-radius: 1rem; }
+  .review-hero > img { width: 4.5rem; height: 4.5rem; }
+  .review-hero h1 { font-size: clamp(1.5rem, 7vw, 2.1rem); }
+  .compose, .card { border-radius: .9rem; }
+  .compose-actions { align-items: stretch; flex-direction: column; }
+  .compose button { min-height: 2.9rem; }
+}
 
   async function load() {
     $('refresh').disabled = true;

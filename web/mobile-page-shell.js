@@ -19,24 +19,24 @@
     <style>${L.styleText(':host')}</style>
     <style>
       :host {
-        --blue-deep: #0e0d6a;
-        --blue: #0a4695;
-        --blue-soft: #eaf2fb;
-        --line: #e5e5ea;
-        --panel: #fff;
-        --ink: #1a1a1f;
-        --sub: #45454d;
-        --mut: #6b6b73;
-        --gold: #f0b21f;
-        --gold-deep: #8a5a00;
-        --gold-soft: #fdf3d2;
-        --blue-line: #cfe0f2;
-        --chip: #f0f3f7;
-        --danger: #d92d20;
-        --blue-grad: linear-gradient(135deg, #0e0d6a 0%, #0a4695 45%, #0862aa 68%, #01b6ec 100%);
-        --glass: rgba(255, 255, 255, .78);
-        --glass-border: rgba(255, 255, 255, .62);
-        --shadow: 0 2px 8px rgba(26, 26, 31, .10), 0 14px 34px rgba(14, 13, 106, .18);
+        --blue-deep: #6F1B0F;
+        --blue: #B6391D;
+        --blue-soft: #FCE7DD;
+        --line: #D7CBB7;
+        --panel: #FFFDF8;
+        --ink: #161C26;
+        --sub: #29333E;
+        --mut: #707574;
+        --gold: #C4A06C;
+        --gold-deep: #6F4D21;
+        --gold-soft: #F8EBD2;
+        --blue-line: #D9B7A4;
+        --chip: #F1E4CC;
+        --danger: #6F1B0F;
+        --blue-grad: linear-gradient(135deg, #161C26 0%, #29333E 62%, #B6391D 100%);
+        --glass: rgba(255, 253, 248, .94);
+        --glass-border: rgba(215, 203, 183, .96);
+        --shadow: 0 2px 8px rgba(22, 28, 38, .10), 0 14px 34px rgba(22, 28, 38, .12);
         color: var(--ink);
         font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
       }
@@ -102,7 +102,7 @@
       }
       .action + .action { border-top: 1px solid rgba(229, 229, 234, .72); border-radius: 0; }
       .action svg { width: 1.05rem; height: 1.05rem; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-      .action:active { background: rgba(10, 70, 149, .08); }
+      .action:active { background: rgba(182, 57, 29, .08); }
       .action.starred { color: var(--gold-deep); }
       .action.starred svg { fill: currentColor; }
       .action:disabled { opacity: .5; }

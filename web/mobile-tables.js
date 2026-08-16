@@ -164,11 +164,11 @@
 
   /** 元ページの配色に関係なく読める最低限の色。共有くんのパレットに合わせる */
   const palette = {
-    '--mb-line': '#e5e5ea',
-    '--mb-panel': '#fff',
-    '--mb-head': '#f0f3f7',
-    '--mb-ink': '#1a1a1f',
-    '--mb-mut': '#6b6b73',
+    '--mb-line': '#D7CBB7',
+    '--mb-panel': '#FFFDF8',
+    '--mb-head': '#F1E4CC',
+    '--mb-ink': '#161C26',
+    '--mb-mut': '#707574',
   };
 
   let styleEl = null;

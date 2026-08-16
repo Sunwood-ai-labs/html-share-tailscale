@@ -15,7 +15,7 @@
 <link rel="manifest" href="/app.webmanifest" crossorigin="use-credentials">
 <meta name="apple-mobile-web-app-title" content="HTML共有くん">
 <!-- 上バーの上端と同じ色。ここがずれるとステータスバーの周りが継ぎはぎになる -->
-<meta name="theme-color" content="#0a4695">
+<meta name="theme-color" content="#161C26">
 <!-- 一覧の見た目と描画の正本。スマホの個別ページ側も同じものを読む -->
 <script src="/page-list.js"></script>
 <script>MyBriefsList.injectIntoHead();</script>
@@ -492,6 +492,348 @@ body.page-controls-hidden #page-actions {
     background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none;
   }
 }
+
+/* ── Tailnet Rock visual system ───────────────────────────────
+   ヘッダー画像から抽出した色を、役割ごとの少数トークンに固定する。
+   紙 = 作業面、墨紺 = ナビゲーション、朱 = 主動作、シアン = 同期、金 = 補助情報。 */
+:root {
+  color-scheme: light;
+  --rock-paper: #E9D9B6;
+  --rock-paper-2: #E2CFAD;
+  --rock-ink: #161C26;
+  --rock-ink-2: #29333E;
+  --rock-vermilion: #B6391D;
+  --rock-vermilion-deep: #6F1B0F;
+  --rock-cyan: #1BC3D3;
+  --rock-cyan-deep: #087C88;
+  --rock-gold: #C4A06C;
+  --bg: #F7F0E2;
+  --panel: #FFFDF8;
+  --ink: var(--rock-ink);
+  --sub: var(--rock-ink-2);
+  --mut: #707574;
+  --line: #D7CBB7;
+  --soft: #F7F0E2;
+  --blue-deep: var(--rock-vermilion-deep);
+  --blue: var(--rock-vermilion);
+  --blue-mid: var(--rock-vermilion-deep);
+  --blue-bright: var(--rock-cyan);
+  --blue-soft: #FCE7DD;
+  --blue-line: #D9B7A4;
+  --blue-grad: linear-gradient(135deg, var(--rock-ink) 0%, var(--rock-ink-2) 62%, var(--rock-vermilion) 100%);
+  --safe-top: var(--rock-ink);
+  --gold: var(--rock-gold);
+  --gold-deep: #6F4D21;
+  --gold-soft: #F8EBD2;
+  --accent: var(--rock-vermilion);
+  --accent-soft: var(--blue-soft);
+  --star: var(--rock-gold);
+  --chip: #F1E4CC;
+  --shadow: 0 1px 2px rgba(22, 28, 38, .04), 0 18px 40px rgba(22, 28, 38, .08);
+  --bar-glow: radial-gradient(110% 180% at 100% 140%, rgba(182, 57, 29, .28), transparent 62%);
+  --repository-deep: linear-gradient(90deg, var(--rock-ink), var(--rock-ink-2));
+  --repository-mid: linear-gradient(90deg, var(--rock-ink-2), var(--rock-vermilion));
+  --repository-bright: linear-gradient(90deg, var(--rock-vermilion), var(--rock-cyan));
+  --repository-soft: linear-gradient(90deg, var(--rock-paper-2), var(--line));
+}
+
+html, body { background: var(--bg); }
+body {
+  color: var(--ink);
+  font-family: "Avenir Next", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
+}
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid var(--rock-cyan);
+  outline-offset: 3px;
+}
+.topbar {
+  background: var(--rock-ink);
+  border-bottom: 1px solid rgba(233, 217, 182, .16);
+  box-shadow: 0 10px 26px rgba(22, 28, 38, .18);
+  isolation: isolate;
+}
+.topbar::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--rock-vermilion) 34%, var(--rock-cyan) 68%, transparent);
+  opacity: .95;
+}
+.topbar-inner { width: min(86rem, 100%); height: 4rem; gap: .7rem; }
+.brand {
+  margin-left: 0;
+  min-height: 2.75rem;
+  padding: .25rem .4rem;
+  gap: .55rem;
+  border-radius: .8rem;
+  color: var(--rock-paper);
+}
+.brand:hover { background: rgba(233, 217, 182, .10); }
+.brand:active { background: rgba(233, 217, 182, .16); }
+.brand-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  object-fit: contain;
+  padding: .2rem;
+  border-radius: .72rem;
+  background: var(--rock-paper);
+}
+.brand-copy { display: grid; gap: .05rem; text-align: left; }
+.brand .label { font-size: .9rem; font-weight: 800; letter-spacing: .04em; }
+.brand-sub {
+  color: rgba(233, 217, 182, .62);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  line-height: 1;
+}
+.brand-meta { color: rgba(233, 217, 182, .66); }
+.topbar-actions { gap: .5rem; }
+.tb-btn, .search {
+  height: 2.75rem;
+  border-color: rgba(233, 217, 182, .24);
+  border-radius: .85rem;
+  background: rgba(233, 217, 182, .08);
+  color: var(--rock-paper);
+}
+.tb-btn { padding: 0 .85rem; }
+.tb-btn:hover, .search:hover,
+.search:focus-within {
+  border-color: rgba(27, 195, 211, .78);
+  background: rgba(27, 195, 211, .12);
+}
+.tb-dot {
+  background: var(--rock-cyan);
+  box-shadow: 0 0 0 .08rem var(--rock-ink);
+}
+.search { width: 2.75rem; }
+body.searching .search {
+  width: min(20rem, 40vw);
+  background: rgba(233, 217, 182, .12);
+  border-color: rgba(233, 217, 182, .48);
+}
+.home-content {
+  width: min(86rem, 100%);
+  margin: 0 auto;
+  padding-top: 1.75rem;
+}
+.dashboard-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(15rem, .75fr);
+  gap: 2rem;
+  min-height: 15rem;
+  margin-bottom: 2.25rem;
+  overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid rgba(233, 217, 182, .18);
+  border-radius: 1.5rem;
+  background: var(--rock-ink);
+  color: var(--rock-paper);
+  box-shadow: 0 22px 44px rgba(22, 28, 38, .18);
+  isolation: isolate;
+}
+.dashboard-hero::before,
+.dashboard-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.dashboard-hero::before {
+  width: 24rem;
+  height: 24rem;
+  right: -7rem;
+  top: -10rem;
+  background: radial-gradient(circle, rgba(182, 57, 29, .42), transparent 68%);
+}
+.dashboard-hero::after {
+  width: 20rem;
+  height: 20rem;
+  right: 12rem;
+  bottom: -15rem;
+  background: radial-gradient(circle, rgba(27, 195, 211, .28), transparent 70%);
+}
+.hero-copy { position: relative; z-index: 1; align-self: center; }
+.hero-kicker {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 .8rem;
+  color: var(--rock-cyan);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.hero-signal-dot {
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: var(--rock-cyan);
+  box-shadow: 0 0 0 .25rem rgba(27, 195, 211, .16);
+}
+.dashboard-hero h1 {
+  max-width: 30rem;
+  margin: 0;
+  color: var(--rock-paper);
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.06;
+  letter-spacing: -.065em;
+}
+.dashboard-hero h1 em { color: #F36A4B; font-style: normal; }
+.hero-lead { margin: 1rem 0 0; color: rgba(233, 217, 182, .72); font-size: .9rem; line-height: 1.7; }
+.hero-stats { display: flex; gap: .6rem; margin-top: 1.4rem; }
+.hero-stat {
+  display: grid;
+  gap: .1rem;
+  min-width: 6.8rem;
+  padding: .6rem .75rem;
+  border: 1px solid rgba(233, 217, 182, .16);
+  border-radius: .75rem;
+  background: rgba(233, 217, 182, .06);
+}
+.hero-stat strong { color: var(--rock-paper); font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.hero-stat span { color: rgba(233, 217, 182, .56); font-size: .64rem; }
+.hero-signal {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: .85rem;
+  min-height: 11rem;
+  border-left: 1px solid rgba(233, 217, 182, .18);
+  color: rgba(233, 217, 182, .58);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .63rem;
+  letter-spacing: .04em;
+}
+.signal-orbit {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 8rem;
+  height: 8rem;
+  border: 1px solid rgba(27, 195, 211, .54);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1rem rgba(27, 195, 211, .05), 0 0 0 2rem rgba(182, 57, 29, .05);
+}
+.signal-orbit::before,
+.signal-orbit::after {
+  content: "";
+  position: absolute;
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+}
+.signal-orbit::before { top: .45rem; right: 1.05rem; background: var(--rock-vermilion); }
+.signal-orbit::after { bottom: .8rem; left: .65rem; background: var(--rock-cyan); }
+.signal-orbit img { width: 5rem; height: 5rem; object-fit: contain; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .24)); }
+.dgroup { margin-bottom: 2.6rem; }
+.dhead { color: var(--rock-vermilion); }
+.dhead::after { background: var(--line); opacity: 1; }
+.theme, .solo {
+  border-color: var(--line);
+  border-radius: 1.1rem;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.theme { border-top: 3px solid var(--rock-vermilion); }
+.solo { border-top: 3px solid var(--rock-cyan); }
+.tname { color: var(--ink); }
+.tunread { border-color: #E8C6B7; background: var(--blue-soft); color: var(--rock-vermilion-deep); }
+.row-wrap + .row-wrap::before { background: var(--line); }
+.row-wrap:hover .row { background: #FFF3ED; }
+.row .dot.on { background: var(--rock-cyan); box-shadow: 0 0 0 3px rgba(27, 195, 211, .18); }
+.row .t { color: var(--sub); }
+.row .dot.on ~ .t { color: var(--ink); }
+.fresh-label {
+  flex: none;
+  padding: .12rem .38rem;
+  border-radius: .35rem;
+  background: var(--rock-vermilion);
+  color: #fff;
+  font-size: .61rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+.row .sh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: .4rem;
+  background: var(--chip);
+  color: var(--rock-vermilion);
+  font-size: .9rem;
+  font-weight: 800;
+  opacity: 1;
+}
+.more { color: var(--rock-vermilion); }
+.more:hover { background: #FFF3ED; }
+#trash-toggle { background: var(--panel); }
+#trash-toggle:hover { border-color: var(--rock-vermilion); color: var(--rock-vermilion); }
+#home-btn, #page-more {
+  border-color: var(--line);
+  background: rgba(255, 253, 248, .94);
+  color: var(--rock-ink-2);
+  box-shadow: var(--shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#home-btn:hover, #page-more:hover { background: var(--panel); color: var(--rock-vermilion); }
+#page-menu, #page-share-panel {
+  border-color: var(--line);
+  border-radius: .95rem;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.page-action + .page-action { border-color: var(--line); }
+.page-action:hover { background: #FFF3ED; }
+.page-action.starred { color: var(--gold-deep); }
+.page-action.delete { color: var(--rock-vermilion); }
+#page-share-panel select, #page-share-issue { background: var(--panel); }
+#page-share-issue { border-color: var(--rock-vermilion); background: var(--rock-vermilion); }
+
+@media (prefers-contrast: more) {
+  .theme, .solo, .hero-stat, .tb-btn, .search { border-width: 2px; }
+  .row-wrap + .row-wrap::before { background: var(--rock-ink-2); }
+}
+
+@media (max-width: 46rem) {
+  .topbar { background: var(--rock-ink); }
+  .topbar-inner { height: 3.75rem; gap: .35rem; }
+  .brand-mark { width: 2.15rem; height: 2.15rem; }
+  .brand-sub, .brand-meta { display: none; }
+  .brand .label { font-size: .84rem; }
+  .tb-btn, .search { width: 2.75rem; height: 2.75rem; padding: 0; justify-content: center; }
+  .tb-btn .label { display: none; }
+  body.searching .search { width: auto; flex: 1; }
+  .home-content { padding-top: 1.25rem; }
+  .dashboard-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    margin-bottom: 1.7rem;
+    padding: 1.35rem;
+    border-radius: 1.15rem;
+  }
+  .dashboard-hero h1 { font-size: clamp(2rem, 11vw, 3.1rem); }
+  .hero-signal { display: none; }
+  .hero-stats { margin-top: 1.1rem; }
+  .hero-stat { min-width: 6.2rem; }
+  .theme, .solo { border-radius: .95rem; }
+  .row { padding-top: .7rem; padding-bottom: .7rem; }
+  .row .fresh-label { display: inline-flex; }
+  #home-btn, #page-more { width: 2.75rem; height: 2.75rem; border-radius: .9rem; }
+}
 </style>
 </head>
 <body>
@@ -502,8 +844,8 @@ body.page-controls-hidden #page-actions {
       <header class="topbar">
         <div class="topbar-inner">
           <button class="brand" id="brand" type="button" title="トップへ戻る">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7M6.4 9.6V19h11.2V9.6"/></svg>
-            <span class="label">HTML共有くん</span>
+            <img class="brand-mark" src="/icons/icon-192.png" alt="" width="36" height="36">
+            <span class="brand-copy"><span class="label">HTML共有くん</span><span class="brand-sub">TAILNET CONSOLE</span></span>
           </button>
           <span class="brand-meta" id="brand-meta"></span>
           <div class="topbar-actions">
@@ -528,6 +870,21 @@ body.page-controls-hidden #page-actions {
         </div>
       </header>
       <div class="home-content">
+        <section class="dashboard-hero" aria-labelledby="dashboard-title">
+          <div class="hero-copy">
+            <p class="hero-kicker"><span class="hero-signal-dot"></span>TAILNET CONSOLE</p>
+            <h1 id="dashboard-title">確認・返信を、<em>ここから。</em></h1>
+            <p class="hero-lead">PCで作ったHTMLを、このTailnetの次の画面へ。</p>
+            <div class="hero-stats" aria-label="ダッシュボードの状態">
+              <div class="hero-stat"><strong id="hero-page-count">—</strong><span>表示中</span></div>
+              <div class="hero-stat"><strong id="hero-updated">—</strong><span>最終同期</span></div>
+            </div>
+          </div>
+          <div class="hero-signal" aria-hidden="true">
+            <div class="signal-orbit"><img src="/icons/icon-192.png" alt=""></div>
+            <span>local → tailnet → next screen</span>
+          </div>
+        </section>
         <div id="tiles"></div>
         <div class="trash-bar">
           <button id="trash-toggle" type="button"><span id="trash-label"></span></button>
@@ -572,6 +929,7 @@ body.page-controls-hidden #page-actions {
 (() => {
   const $ = (id) => document.getElementById(id);
   const frame = $('frame'), home = $('home'), tilesEl = $('tiles'), brandMeta = $('brand-meta');
+  const heroPageCount = $('hero-page-count'), heroUpdated = $('hero-updated');
   const searchBox = $('search'), searchToggle = $('search-toggle'), searchClear = $('search-clear');
   const refresh = $('refresh'), pageRefresh = $('page-refresh');
   const pageMore = $('page-more'), pageMenu = $('page-menu'), pageSharePanel = $('page-share-panel');
@@ -871,13 +1229,22 @@ body.page-controls-hidden #page-actions {
     const title = document.createElement('div');
     title.className = 't';
     title.textContent = page.title;
-    button.append(dot, title);
+    if (fresh) {
+      const freshLabel = document.createElement('span');
+      freshLabel.className = 'fresh-label';
+      freshLabel.textContent = '新着';
+      button.append(dot, freshLabel, title);
+    } else {
+      button.append(dot, title);
+    }
 
     if (page.sharedHref) {
       const mark = document.createElement('span');
       mark.className = 'sh';
       const isOpen = page.shareMode === 'public';
-      mark.textContent = isOpen ? '🌐' : '🔗';
+      mark.textContent = '↗';
+      mark.setAttribute('role', 'img');
+      mark.setAttribute('aria-label', isOpen ? 'Tailnet内の期限付き共有リンクあり' : 'Tailnet内の共有リンクあり');
       mark.title = isOpen ? 'Tailnet内の期限付き共有リンクあり' : 'Tailnet内の共有リンクあり';
       button.append(mark);
     }
@@ -1055,7 +1422,10 @@ body.page-controls-hidden #page-actions {
   }
 
   function setStamp() {
-    if (meta) brandMeta.textContent = `${pages.length}ページ ／ ${fmtDateTime(meta.generatedAt)} 更新`;
+    if (!meta) return;
+    brandMeta.textContent = `${pages.length}ページ ／ ${fmtDateTime(meta.generatedAt)} 更新`;
+    heroPageCount.textContent = String(pages.length).padStart(2, '0');
+    heroUpdated.textContent = shortTime(meta.generatedAt) || '—';
   }
 
   function select(slug) {

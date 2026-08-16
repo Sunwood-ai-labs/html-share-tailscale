@@ -3,9 +3,9 @@
 
   // 共有くんが配るページの上端色はここ1か所に固定する。ダッシュボード（app/index.html）と
   // インボックス（review/index.html）の --safe-top と同じ値。
-  // ページごとの theme-color を尊重していた頃は、トップ #0a4695 → 個別ページ #0e0d6a と
+  // ページごとの theme-color を尊重していた頃は、トップと個別ページで
   // 画面を移った瞬間に Dynamic Island の色が変わって継ぎはぎに見えた（2026-08-13 実機で発覚）。
-  const safeTop = '#0a4695';
+  const safeTop = '#161C26';
   const rootStyle = getComputedStyle(document.documentElement);
   // theme-color は配信時に同じ値へ揃える。
   // ここでJSから書き換えない（PWAは追加時点のHTMLの値を使うので実行時では間に合わない）。
@@ -72,13 +72,13 @@
          だから同じ症状が出ていなかった。ここも両方そろえる。
          本文の白は下の background-image（ヒーロー下端から page-bg）が受け持つので、
          background-color を青にしても本文の見た目は変わらない */
-      html { background-color: var(--mybriefs-safe-top, #0a4695) !important; }
+      html { background-color: var(--mybriefs-safe-top, #161C26) !important; }
       body {
-        background-color: var(--mybriefs-safe-top, #0a4695) !important;
+        background-color: var(--mybriefs-safe-top, #161C26) !important;
         background-image: linear-gradient(
           to bottom,
-          var(--mybriefs-safe-top, #0a4695) 0,
-          var(--mybriefs-safe-top, #0a4695) var(--mybriefs-hero-end, 0px),
+          var(--mybriefs-safe-top, #161C26) 0,
+          var(--mybriefs-safe-top, #161C26) var(--mybriefs-hero-end, 0px),
           var(--mybriefs-page-bg, #fff) var(--mybriefs-hero-end, 0px),
           var(--mybriefs-page-bg, #fff) 100%
         ) !important;
@@ -89,7 +89,7 @@
         z-index: 2147483000;
         inset: 0 0 auto;
         height: 0.5rem;
-        background-color: var(--mybriefs-safe-top, #0a4695);
+        background-color: var(--mybriefs-safe-top, #161C26);
         pointer-events: none;
       }
       .mybriefs-safe-area-surface[hidden] { display: none; }
