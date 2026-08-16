@@ -42,6 +42,8 @@ test('ships the full dashboard UI and inbox wording', () => {
   assert.match(dashboard, /\.topbar \{\s*background-color: var\(--rock-ink\);[\s\S]*?var\(--wallpaper-image\)/);
   assert.match(dashboard, /opacity: 1/);
   assert.match(dashboard, /rgba\(22, 28, 38, \.46\)/);
+  assert.match(dashboard, /--panel: rgba\(255, 253, 248, \.72\)/);
+  assert.match(dashboard, /\.theme, \.solo \{[\s\S]*?backdrop-filter: blur\(18px\)/);
   assert.match(wallpaper, /max-width: 46rem/);
   assert.match(wallpaper, /ROTATION_MS/);
   for (const file of [
