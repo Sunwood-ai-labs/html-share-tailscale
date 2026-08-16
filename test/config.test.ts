@@ -10,40 +10,47 @@ function fixture(): { root: string; config: string } {
   mkdirSync(path.join(root, 'pages'));
   writeFileSync(path.join(root, 'pages', 'demo.html'), '<h1>Demo</h1>');
   const config = path.join(root, 'html-share.config.yaml');
-  writeFileSync(config, `ownerEmail: owner@example.com
-aws:
-  region: ap-northeast-1
-  consoleDomain: console.example.com
-  contentDomain: content.example.com
-  certificateArn: arn:aws:acm:us-east-1:111122223333:certificate/00000000-0000-4000-8000-000000000000
-  cognitoDomainPrefix: html-share-test
-  publicKeyPath: .html-share/keys/public.pem
-  privateKeyPath: .html-share/keys/private.pem
-  privateKeyParameterName: /html-share/test/private-key
+  writeFileSync(config, `server:
+  host: 127.0.0.1
+  port: 4311
+  publicUrl: https://madesk.example.ts.net:9222
+  dataDir: .html-share/data
+  siteDir: .html-share/site
+  tailscale:
+    hostname: madesk.example.ts.net
+    httpsPort: 9222
 content:
   roots: [pages]
-  allowedInternalCidrs: [203.0.113.0/24]
   pages:
     - path: pages/demo.html
       repository: examples
       stream: release-notes
       streamLabel: リリースノート
-  ownerLinkDays: 7
   maximumShareDays: 30
   maximumAssetBytes: 1024
 `);
   return { root, config };
 }
 
-test('loads a valid config and resolves its base directory', () => {
+test('loads a Tailscale config and resolves its base directory', () => {
   const { root, config } = fixture();
   const loaded = loadConfig(config);
   assert.equal(loaded.baseDir, root);
+  assert.equal(loaded.server.host, '127.0.0.1');
+  assert.equal(loaded.server.port, 4311);
+  assert.equal(loaded.server.publicUrl, 'https://madesk.example.ts.net:9222');
+  assert.equal(loaded.server.tailscale.httpsPort, 9222);
   assert.equal(loaded.content.pages[0].path, 'pages/demo.html');
   assert.equal(loaded.content.pages[0].repository, 'examples');
   assert.equal(loaded.content.pages[0].stream, 'release-notes');
   assert.equal(loaded.content.pages[0].streamLabel, 'リリースノート');
-  assert.deepEqual(loaded.content.allowedInternalCidrs, ['203.0.113.0/24']);
+});
+
+test('allows an empty page list for a newly initialized local dashboard', () => {
+  const { config } = fixture();
+  const source = readFileSync(config, 'utf8').replace(/  pages:\n    - path: pages\/demo\.html\n      repository: examples\n      stream: release-notes\n      streamLabel: リリースノート\n/, '  pages: []\n');
+  writeFileSync(config, source);
+  assert.deepEqual(loadConfig(config).content.pages, []);
 });
 
 test('adds a page only once', () => {
@@ -53,17 +60,14 @@ test('adds a page only once', () => {
   assert.equal((readFileSync(config, 'utf8').match(/pages\/second\.html/g) ?? []).length, 1);
 });
 
-test('requires separate console and content origins', () => {
+test('requires a loopback bind host', () => {
   const { config } = fixture();
-  const source = readFileSync(config, 'utf8').replace('content.example.com', 'console.example.com');
-  writeFileSync(config, source);
-  assert.throws(() => loadConfig(config), /must be different security origins/);
+  writeFileSync(config, readFileSync(config, 'utf8').replace('host: 127.0.0.1', 'host: 0.0.0.0'));
+  assert.throws(() => loadConfig(config), /loopback-only/);
 });
 
-test('rejects invalid internal CIDRs', () => {
+test('requires the Tailscale hostname and public URL to match', () => {
   const { config } = fixture();
-  const invalid = '999' + '.0.0.1/40';
-  const source = readFileSync(config, 'utf8').replace('203.0.113.0/24', invalid);
-  writeFileSync(config, source);
-  assert.throws(() => loadConfig(config), /must be an IPv4 CIDR/);
+  writeFileSync(config, readFileSync(config, 'utf8').replace('hostname: madesk.example.ts.net', 'hostname: other.example.ts.net'));
+  assert.throws(() => loadConfig(config), /must match server\.publicUrl/);
 });

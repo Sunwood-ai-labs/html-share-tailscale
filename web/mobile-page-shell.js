@@ -153,7 +153,7 @@
       </button>
     </div>
     <div class="share-panel" aria-label="共有URLの発行" hidden>
-      <label>公開範囲<select class="scope"><option value="i">社内限定</option><option value="p">IP制限なし</option></select></label>
+      <label>アクセス範囲<select class="scope"><option value="i">Tailnet内（Tailscale）</option></select></label>
       <label>有効日数<select class="days"><option>1</option><option>3</option><option selected>7</option><option>14</option><option>30</option><option>90</option></select></label>
       <button class="issue" type="button">発行してコピー</button>
     </div>
@@ -171,8 +171,8 @@
   const READ_KEY = 'mb_read_marks';
   // 開かないまま放置したページが延々と黄色く残らないよう、新着表示はこの日数までに限る
   const NEW_WINDOW_DAYS = 30;
-  // 生成HTMLは管理画面と別オリジンで配信するため、端末内の表示設定だけを使う。
-  const CAN_SYNC = false;
+  // Tailscale Serveでは管理画面と成果物を同じオリジンから配信する。
+  const CAN_SYNC = location.protocol === 'https:' || location.hostname === '127.0.0.1';
   let allPages = [];
   let currentPage = null;
   let starredSources = [];
@@ -214,18 +214,10 @@
   // 既読の記録・マージ・書き戻し判定はすべて page-list.js が正本。ここは呼ぶだけにする
   const seedReadMarks = () => L.seedReadMarks(allPages, readMarks);
 
-  async function sha256(value) {
-    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-    return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  }
-
   async function preferencesApi(options = {}) {
     const body = options.body;
     const headers = { ...(options.headers ?? {}) };
-    if (body) {
-      headers['content-type'] = 'application/json';
-      headers['x-amz-content-sha256'] = await sha256(body);
-    }
+    if (body) headers['content-type'] = 'application/json';
     const response = await fetch('/api/owner/preferences', { cache: 'no-store', ...options, headers });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error ?? '表示設定の保存に失敗しました');
@@ -341,10 +333,6 @@
     if (!currentPage) return;
     const mode = $('.scope').value;
     const days = Number($('.days').value);
-    if (
-      mode === 'p' &&
-      !confirm(`「${currentPage.title}」をIP制限なしで${days}日間共有します。よろしいですか？`)
-    ) return;
     issue.disabled = true;
     issue.textContent = '発行中…';
     let generatedUrl = '';

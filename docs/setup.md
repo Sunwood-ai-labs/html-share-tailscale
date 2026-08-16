@@ -1,54 +1,99 @@
 # 初回セットアップ
 
-HTML共有くんは、自分のAWSアカウントへ構築して使います。セットアップ後の日常操作は、Claude Codeへ日本語で依頼できます。
+HTML共有くんは、HTMLとレビュー状態をこのPCへ保存し、Tailscale ServeでTailnet内へ公開します。AWSアカウントや外部ホスティングは必要ありません。
 
 ## 必要なもの
 
 - Node.js 22以降
-- AWSアカウントとAWS CLIの認証
-- 2つのホスト名
-- 米国東部（バージニア北部）リージョンで発行したACM証明書
-- Claude CodeまたはCodex
+- Tailscaleがインストール済みで、このPCとスマホが同じTailnetへ接続済み
+- Claude CodeまたはCodex（任意）
 
 ## インストール
 
 ```bash
-git clone https://github.com/minorun365/html-share.git
-cd html-share
+git clone https://github.com/Sunwood-ai-labs/html-share-tailscale.git
+cd html-share-tailscale
 npm install
 npm run build
 npm link
 cp html-share.config.example.yaml html-share.config.yaml
 ```
 
-`html-share.config.yaml` のサンプル値を、自分のAWS環境とドメインへ置き換えてください。`content.roots` には、共有を許可するディレクトリだけを列挙します。
+Windowsでは `copy html-share.config.example.yaml html-share.config.yaml` でも構いません。
 
-## 署名鍵とAWS環境の作成
+## 設定
+
+`html-share.config.yaml` の次の値を、自分のTailnetに合わせます。
+
+- `server.publicUrl`: Tailscale Serveで使うHTTPS URL
+- `server.tailscale.hostname`: `publicUrl` と同じ `*.ts.net` ホスト名
+- `server.tailscale.httpsPort`: ServeのHTTPSポート
+- `content.roots`: 共有を許可するローカルディレクトリ
+- `content.pages`: 最初から一覧へ出すHTML
+
+`server.host` は `127.0.0.1` のままにしてください。HTTPサーバーをLANへ直接バインドせず、Tailscale Serveだけを入口にします。
+
+## 起動とTailscale Serve
+
+まずページをビルドしてローカルサイトへ反映します。
 
 ```bash
-html-share keys init
-html-share keys store
-npm run deploy
 html-share publish
 ```
 
-CDKの出力に表示されるCloudFrontドメインへ、設定した2つのホスト名をCNAMEまたはRoute 53エイリアスで向けます。
-
-## スキルの追加
-
-同梱の `create-html` は、メモや調査結果を読みやすいHTMLに整えます。`mobile` は、PC作業の確認依頼をスマホへ送ります。`inbox` は、スマホから置いた依頼をPCで引き取ります。
+別のターミナルでローカルサーバーを起動します。
 
 ```bash
-mkdir -p ~/.claude/skills
-ln -s "$(pwd)/skills/create-html" ~/.claude/skills/create-html
-ln -s "$(pwd)/skills/mobile" ~/.claude/skills/mobile
-ln -s "$(pwd)/skills/inbox" ~/.claude/skills/inbox
+html-share serve
 ```
 
-複数のプロジェクトで使う場合は、設定を `~/.config/html-share/config.yaml` へ置くか、`HTML_SHARE_CONFIG` で場所を指定します。
+さらに別のターミナルで、設定値どおりのTailscale Serveを追加します。
+
+```bash
+html-share tailscale serve
+```
+
+または、Tailscale CLIを直接使う場合は次の形です。
+
+```bash
+tailscale serve --bg --https=9222 http://127.0.0.1:4311
+```
+
+既存のServe設定を使っている場合は、同じポートの転送先が `http://127.0.0.1:4311` になっていることだけ確認してください。`tailscale serve reset` や Funnel は実行しません。
+
+スマホでは、次のURLをTailscale接続中のSafariで開きます。
+
+```text
+https://<tailnet-hostname>:<https-port>/app/index.html
+```
+
+## ページを追加する
+
+共有許可ディレクトリ内のHTMLを登録し、再公開します。
+
+```bash
+html-share page add reports/today.html --title "今日のレポート"
+html-share publish
+```
+
+一覧は設定済みの `content.pages` から生成されます。Codexスレッドを自動で一覧化するものではないため、スレッドをHTML化した場合はそのHTMLを登録してください。
+
+## レビューとインボックス
+
+`/mobile` と `/inbox` は同じローカルレビューAPIを使います。
+
+```bash
+html-share review inbox
+html-share review push --session "<session-id>"
+```
+
+レビュー状態は `server.dataDir`（既定では `.html-share/data`）に保存されます。ペアリングコードやクラウド鍵は使いません。
 
 ## 動作確認
 
-Claude Codeへ「このHTMLを共有くんに追加して」と依頼し、本人専用の一覧にページが表示されれば完了です。
+```bash
+curl http://127.0.0.1:4311/api/health
+curl -I https://<tailnet-hostname>:<https-port>/app/index.html
+```
 
-開発者向けの検証コマンドは [CONTRIBUTING.md](../CONTRIBUTING.md) を参照してください。
+最後に、スマホの実ブラウザで一覧、個別ページ、インボックスを開いて確認してください。

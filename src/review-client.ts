@@ -1,14 +1,8 @@
-import { createHash } from 'node:crypto';
-import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { homedir, hostname } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import path from 'node:path';
 import type { HtmlShareConfig } from './config.js';
-
-interface DeviceCredentials {
-  deviceToken: string;
-  deviceName: string;
-  apiBase: string;
-}
+import { localOrigin } from './local-server.js';
 
 export interface ReviewCard {
   id?: string;
@@ -25,70 +19,24 @@ export interface ReviewCard {
   createdAt?: string;
 }
 
-function credentialsPath(): string {
-  return process.env.HTML_SHARE_CREDENTIALS
-    ?? path.join(homedir(), '.config', 'html-share', 'review-device.json');
-}
-
 function apiBase(config: HtmlShareConfig): string {
-  return `https://${config.aws.consoleDomain}/api`;
-}
-
-function loadCredentials(): DeviceCredentials | null {
-  const file = credentialsPath();
-  if (!existsSync(file)) return null;
-  try {
-    const parsed = JSON.parse(readFileSync(file, 'utf8')) as DeviceCredentials;
-    return parsed.deviceToken ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveCredentials(value: DeviceCredentials): void {
-  const file = credentialsPath();
-  mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
-  writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600 });
-  chmodSync(file, 0o600);
+  return `${localOrigin(config)}/api`;
 }
 
 async function request(config: HtmlShareConfig, pathname: string, options: {
   method?: string;
   body?: unknown;
-  authenticated?: boolean;
 } = {}): Promise<any> {
-  const authenticated = options.authenticated !== false;
-  const saved = loadCredentials();
-  if (authenticated && !saved) throw new Error('This computer is not paired. Run `html-share review pair <code>`.');
-  if (authenticated && saved!.apiBase !== apiBase(config)) {
-    throw new Error('The paired console does not match this config. Pair this computer again before sending credentials.');
-  }
   const serialized = options.body === undefined ? undefined : JSON.stringify(options.body);
   const response = await fetch(`${apiBase(config)}${pathname}`, {
     method: options.method ?? 'GET',
-    headers: {
-      ...(serialized ? {
-        'content-type': 'application/json',
-        'x-content-sha256': createHash('sha256').update(serialized).digest('hex'),
-      } : {}),
-      ...(authenticated ? { 'x-review-device-token': saved!.deviceToken } : {}),
-    },
+    headers: serialized ? { 'content-type': 'application/json' } : {},
     body: serialized,
     signal: AbortSignal.timeout(15_000),
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.error ?? `Review API returned ${response.status}`);
   return payload;
-}
-
-export async function pair(config: HtmlShareConfig, code: string, name = `Computer / ${hostname()}`): Promise<string> {
-  const result = await request(config, '/pairings/claim', {
-    method: 'POST',
-    authenticated: false,
-    body: { code, deviceName: name },
-  });
-  saveCredentials({ deviceToken: result.deviceToken, deviceName: result.deviceName, apiBase: apiBase(config) });
-  return result.deviceName;
 }
 
 export async function pushReviews(config: HtmlShareConfig, sessionId: string, cards: ReviewCard[]): Promise<ReviewCard[]> {
@@ -145,6 +93,7 @@ function alive(pid: number): boolean {
 }
 
 export async function watchReviews(config: HtmlShareConfig, sessionId: string, timeoutMinutes = 240): Promise<ReviewCard[]> {
+  if (!Number.isFinite(timeoutMinutes) || timeoutMinutes <= 0) throw new Error('timeout-minutes must be positive');
   const file = pidFile(sessionId);
   if (existsSync(file)) {
     const previous = Number(readFileSync(file, 'utf8').trim());
@@ -155,12 +104,15 @@ export async function watchReviews(config: HtmlShareConfig, sessionId: string, t
   const cleanup = () => { if (existsSync(file)) rmSync(file); };
   process.once('SIGINT', () => { cleanup(); process.exit(0); });
   process.once('SIGTERM', () => { cleanup(); process.exit(0); });
+  const pollMilliseconds = 20_000;
   const deadline = Date.now() + timeoutMinutes * 60_000;
+  const maximumPolls = Math.max(1, Math.ceil((timeoutMinutes * 60_000) / pollMilliseconds));
   try {
-    while (Date.now() < deadline) {
+    for (let attempt = 0; attempt < maximumPolls && Date.now() < deadline; attempt += 1) {
       const items = await pullReviews(config, sessionId);
       if (items.length) return items;
-      await sleep(20_000);
+      const remaining = deadline - Date.now();
+      if (remaining > 0 && attempt + 1 < maximumPolls) await sleep(Math.min(pollMilliseconds, remaining));
     }
     return [];
   } finally {

@@ -283,21 +283,6 @@ footer {
   text-align: center;
   background: var(--soft);
 }
-#pair-button { border: 0; color: var(--mut); background: transparent; font-size: .75rem; cursor: pointer; }
-.pairing {
-  width: min(28rem, calc(100% - 2rem)); padding: 0; border: 0; border-radius: .9rem;
-  box-shadow: 0 20px 60px rgba(14,13,106,.22);
-}
-.pairing::backdrop { background: rgba(14,13,45,.55); }
-.pair-body { padding: 1.1rem; }
-.pair-body h2 { margin: 0 0 .45rem; font-size: 1.1rem; }
-.pair-body p { margin: .35rem 0; color: var(--sub); font-size: .83rem; line-height: 1.55; }
-#pair-code {
-  margin: 1rem 0; padding: .75rem; border-radius: .65rem;
-  color: var(--blue-deep); background: var(--blue-soft); font-size: 1.45rem; font-weight: 800;
-  letter-spacing: .12em; text-align: center;
-}
-.pair-close { width: 100%; min-height: 2.7rem; border: 0; border-radius: .6rem; color: var(--white); background: var(--blue); }
 #toast {
   /* 上バーが sticky で天井を占めるので、その下端より下に出す（3.4rem + 余白） */
   display: none; position: sticky; top: calc(var(--safe-top-inset) + 4rem); z-index: 20;
@@ -394,17 +379,7 @@ footer {
   </section>
 </main>
 
-<footer><button id="pair-button" type="button">Macを登録</button></footer>
-
-<dialog class="pairing" id="pairing">
-  <div class="pair-body">
-    <h2>Macを登録</h2>
-    <p>Claude Codeとの初回接続に使うコードです。10分で無効になります。</p>
-    <div id="pair-code">発行中…</div>
-    <p>Claude Codeで <strong>/mobile pair このコード</strong> と入力してください。</p>
-    <button class="pair-close" type="button">閉じる</button>
-  </div>
-</dialog>
+<footer>Tailnet内限定。Tailscale接続中の端末だけがアクセスできます。</footer>
 <!-- mobile-status.js は読み込まない。あれは個別ページ（/pages/** ほか）の下地を補正する
      スクリプトで、`body > header` を「ヒーロー」とみなし padding-top を !important で足す
      （ホーム画面のWebアプリでは +4.5rem＝72px）。インボックスの上バーは body 直下の <header> なので
@@ -448,25 +423,16 @@ footer {
     return new Date(value).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
   }
 
-  async function sha256(value) {
-    const bytes = new TextEncoder().encode(value);
-    const digest = await crypto.subtle.digest('SHA-256', bytes);
-    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
-  }
-
   async function api(path, options = {}) {
     const payloadHeaders = options.body
-      ? { 'content-type': 'application/json', 'x-amz-content-sha256': await sha256(options.body) }
+      ? { 'content-type': 'application/json' }
       : {};
     const response = await fetch(`/api${path}`, {
       cache: 'no-store',
       ...options,
       headers: { ...payloadHeaders, ...options.headers },
     });
-    if (response.status === 401) {
-      location.href = `/auth/login?return=${encodeURIComponent(location.pathname)}`;
-      throw new Error('ログインが必要です');
-    }
+    if (response.status === 401) throw new Error('Tailscale接続が必要です');
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error ?? '通信に失敗しました');
     return body;
@@ -705,19 +671,6 @@ footer {
     if (!document.hidden && !busy && !$('compose-text').value.trim()) load();
   }, 60_000);
 
-  const pairing = $('pairing');
-  $('pair-button').addEventListener('click', async () => {
-    $('pair-code').textContent = '発行中…';
-    pairing.showModal();
-    try {
-      const result = await api('/owner/pairings', { method: 'POST', body: '{}' });
-      $('pair-code').textContent = result.code;
-    } catch (error) {
-      $('pair-code').textContent = '発行できませんでした';
-      toast(error.message);
-    }
-  });
-  pairing.querySelector('.pair-close').addEventListener('click', () => pairing.close());
   load();
 })();
 </script>

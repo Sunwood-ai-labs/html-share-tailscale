@@ -16,7 +16,7 @@ for (const root of roots) {
     continue;
   }
 
-  const skill = readFileSync(skillFile, 'utf8');
+  const skill = readFileSync(skillFile, 'utf8').replace(/\r\n/g, '\n');
   const match = skill.match(/^---\n([\s\S]*?)\n---\n/);
   if (!match) {
     failures.push(`${name}: SKILL.md must start with YAML frontmatter`);

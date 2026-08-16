@@ -17,13 +17,21 @@ test('bundles local assets and adds privacy metadata', () => {
   assert.match(bundled, /data-mb-tables/);
 });
 
-test('rejects pages outside approved roots, including symlinks', () => {
+test('rejects pages outside approved roots, including symlinks', (t) => {
   const root = mkdtempSync(path.join(tmpdir(), 'html-share-root-'));
   const outside = mkdtempSync(path.join(tmpdir(), 'html-share-outside-'));
   const secret = path.join(outside, 'secret.html');
   writeFileSync(secret, '<p>outside</p>');
   const link = path.join(root, 'linked.html');
-  symlinkSync(secret, link);
+  try {
+    symlinkSync(secret, link);
+  } catch (caught: any) {
+    if (caught?.code === 'EPERM') {
+      t.skip('Windows symlink creation requires Developer Mode or elevated privileges');
+      return;
+    }
+    throw caught;
+  }
   assert.throws(() => bundleHtml(link, [realpathSync(root)], 1024), /outside content\.roots/);
 });
 

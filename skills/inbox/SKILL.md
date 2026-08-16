@@ -5,7 +5,7 @@ description: Read requests the owner placed in HTML共有くん from a phone and
 
 # Inbox
 
-Use the `html-share` CLI. Do not call the review API directly and do not print device tokens.
+Use the `html-share` CLI. The API is reachable only through the local loopback server and Tailscale; do not print private Tailnet URLs outside the user's request.
 
 ## 1. Read waiting requests
 
@@ -16,7 +16,7 @@ html-share review inbox
 - `requests` are unfinished owner requests, oldest first
 - `target` is a project nickname the owner typed on the phone. It may be `null`. Treat it as a hint, not a filesystem path
 - If the array is empty, say there are no inbox requests and stop
-- If the CLI says this computer is not paired, ask the owner to tap "Macを登録" in the inbox and run `/mobile pair <code>`
+- The computer does not need a separate pairing step. If the CLI cannot connect, confirm that the local server is running and Tailscale is connected.
 
 ## 2. Close every request you picked up, before starting
 

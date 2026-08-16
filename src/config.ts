@@ -13,24 +13,22 @@ export interface PageConfig {
 }
 
 export interface HtmlShareConfig {
-  ownerEmail: string;
-  aws: {
-    region: string;
-    consoleDomain: string;
-    contentDomain: string;
-    certificateArn: string;
-    cognitoDomainPrefix: string;
-    publicKeyPath: string;
-    privateKeyPath: string;
-    privateKeyParameterName: string;
+  server: {
+    host: string;
+    port: number;
+    publicUrl: string;
+    dataDir: string;
+    siteDir: string;
+    tailscale: {
+      hostname: string;
+      httpsPort: number;
+    };
   };
   content: {
     roots: string[];
     pages: PageConfig[];
-    ownerLinkDays: number;
     maximumShareDays: number;
     maximumAssetBytes: number;
-    allowedInternalCidrs: string[];
   };
   configFile: string;
   baseDir: string;
@@ -47,6 +45,12 @@ function positiveInteger(value: unknown, fallback: number, name: string): number
   return number;
 }
 
+function port(value: unknown, fallback: number, name: string): number {
+  const result = positiveInteger(value, fallback, name);
+  if (result > 65_535) throw new Error(`${name} must be between 1 and 65535`);
+  return result;
+}
+
 function hostname(value: unknown, name: string): string {
   const result = text(value, name).toLowerCase();
   if (!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(result)) {
@@ -55,12 +59,41 @@ function hostname(value: unknown, name: string): string {
   return result;
 }
 
-function cidr(value: unknown, name: string): string {
+function bindHost(value: unknown): string {
+  const result = text(value, 'server.host');
+  if (!['127.0.0.1', 'localhost', '::1'].includes(result)) {
+    throw new Error('server.host must be loopback-only (127.0.0.1, localhost, or ::1)');
+  }
+  return result === 'localhost' ? '127.0.0.1' : result;
+}
+
+function publicUrl(value: unknown): string {
+  const raw = text(value, 'server.publicUrl');
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error('server.publicUrl must be a valid HTTPS URL');
+  }
+  if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) {
+    throw new Error('server.publicUrl must be an HTTPS URL without credentials, query, or hash');
+  }
+  if (parsed.pathname !== '/' || !parsed.hostname) {
+    throw new Error('server.publicUrl must point to the Tailscale origin without a path');
+  }
+  hostname(parsed.hostname, 'server.publicUrl hostname');
+  if (!parsed.hostname.endsWith('.ts.net')) {
+    throw new Error('server.publicUrl must use a Tailscale *.ts.net hostname');
+  }
+  return parsed.origin;
+}
+
+function relativeDirectory(value: unknown, name: string): string {
   const result = text(value, name);
-  if (!/^(?:\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/.test(result)) throw new Error(`${name} must be an IPv4 CIDR`);
-  const [address, prefix] = result.split('/');
-  if (Number(prefix) > 32 || address.split('.').some((part) => Number(part) > 255)) {
-    throw new Error(`${name} must be an IPv4 CIDR`);
+  if (path.isAbsolute(result)) throw new Error(`${name} must be relative to the config directory`);
+  const normalized = path.normalize(result);
+  if (normalized === '.' || normalized === '..' || normalized.startsWith(`..${path.sep}`)) {
+    throw new Error(`${name} must stay inside the config directory`);
   }
   return result;
 }
@@ -84,36 +117,33 @@ export function loadConfig(file?: string): HtmlShareConfig {
     throw new Error(`Config file not found: ${configFile}. Copy html-share.config.example.yaml first.`);
   }
   const raw = parse(readFileSync(configFile, 'utf8')) as Record<string, any>;
-  const aws = raw?.aws ?? {};
+  const server = raw?.server ?? {};
+  const tailscale = server?.tailscale ?? {};
   const content = raw?.content ?? {};
   const pages = Array.isArray(content.pages) ? content.pages : [];
   const roots = Array.isArray(content.roots) ? content.roots.map((item: unknown) => text(item, 'content.roots[]')) : [];
-  const allowedInternalCidrs = Array.isArray(content.allowedInternalCidrs)
-    ? content.allowedInternalCidrs.map((item: unknown) => cidr(item, 'content.allowedInternalCidrs[]'))
-    : [];
   if (roots.length === 0) throw new Error('content.roots must contain at least one directory');
-  if (pages.length === 0) throw new Error('content.pages must contain at least one page');
-  const ownerEmail = text(raw?.ownerEmail, 'ownerEmail');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail)) throw new Error('ownerEmail must be an email address');
-  const consoleDomain = hostname(aws.consoleDomain, 'aws.consoleDomain');
-  const contentDomain = hostname(aws.contentDomain, 'aws.contentDomain');
-  if (consoleDomain === contentDomain) throw new Error('aws.consoleDomain and aws.contentDomain must be different security origins');
-  const certificateArn = text(aws.certificateArn, 'aws.certificateArn');
-  if (!/^arn:aws:acm:us-east-1:\d{12}:certificate\/[0-9a-f-]+$/i.test(certificateArn)) {
-    throw new Error('aws.certificateArn must be an ACM certificate ARN from us-east-1 for CloudFront');
+
+  const configuredPublicUrl = publicUrl(server.publicUrl);
+  const parsedPublicUrl = new URL(configuredPublicUrl);
+  const tailHostname = hostname(tailscale.hostname ?? parsedPublicUrl.hostname, 'server.tailscale.hostname');
+  if (tailHostname !== parsedPublicUrl.hostname) {
+    throw new Error('server.tailscale.hostname must match server.publicUrl');
+  }
+  const publicHttpsPort = Number(parsedPublicUrl.port) || 443;
+  const httpsPort = port(tailscale.httpsPort, publicHttpsPort, 'server.tailscale.httpsPort');
+  if (publicHttpsPort !== httpsPort) {
+    throw new Error('server.tailscale.httpsPort must match the port in server.publicUrl');
   }
 
   return {
-    ownerEmail,
-    aws: {
-      region: text(aws.region, 'aws.region'),
-      consoleDomain,
-      contentDomain,
-      certificateArn,
-      cognitoDomainPrefix: text(aws.cognitoDomainPrefix, 'aws.cognitoDomainPrefix'),
-      publicKeyPath: text(aws.publicKeyPath, 'aws.publicKeyPath'),
-      privateKeyPath: text(aws.privateKeyPath, 'aws.privateKeyPath'),
-      privateKeyParameterName: text(aws.privateKeyParameterName, 'aws.privateKeyParameterName'),
+    server: {
+      host: bindHost(server.host ?? '127.0.0.1'),
+      port: port(server.port, 4311, 'server.port'),
+      publicUrl: configuredPublicUrl,
+      dataDir: relativeDirectory(server.dataDir ?? '.html-share/data', 'server.dataDir'),
+      siteDir: relativeDirectory(server.siteDir ?? '.html-share/site', 'server.siteDir'),
+      tailscale: { hostname: tailHostname, httpsPort },
     },
     content: {
       roots,
@@ -128,10 +158,8 @@ export function loadConfig(file?: string): HtmlShareConfig {
           streamLabel: typeof page.streamLabel === 'string' ? page.streamLabel.trim() : undefined,
         };
       }),
-      ownerLinkDays: positiveInteger(content.ownerLinkDays, 30, 'content.ownerLinkDays'),
       maximumShareDays: positiveInteger(content.maximumShareDays, 30, 'content.maximumShareDays'),
       maximumAssetBytes: positiveInteger(content.maximumAssetBytes, 10 * 1024 * 1024, 'content.maximumAssetBytes'),
-      allowedInternalCidrs,
     },
     configFile,
     baseDir: path.dirname(configFile),
@@ -144,9 +172,7 @@ export function addPageToConfig(file: string | undefined, pagePath: string, titl
   raw.content ??= {};
   raw.content.pages ??= [];
   if (!Array.isArray(raw.content.pages)) throw new Error('content.pages must be an array');
-  const storedPath = path.isAbsolute(pagePath) || path.dirname(configFile) === process.cwd()
-    ? pagePath
-    : path.resolve(pagePath);
+  const storedPath = pagePath;
   const exists = raw.content.pages.some((item: unknown) =>
     (typeof item === 'string' ? item : (item as Record<string, unknown>)?.path) === storedPath,
   );
@@ -162,21 +188,4 @@ export function validatedRoots(config: HtmlShareConfig): string[] {
     if (!existsSync(absolute)) throw new Error(`Content root not found: ${absolute}`);
     return realpathSync(absolute);
   });
-}
-
-export interface StackOutputs {
-  ConsoleBucketName: string;
-  ContentBucketName: string;
-  ConsoleUrl: string;
-  ContentUrl: string;
-  CloudFrontPublicKeyId: string;
-}
-
-export function loadOutputs(file: string): StackOutputs {
-  const source = JSON.parse(readFileSync(file, 'utf8')) as Record<string, Record<string, string>>;
-  const candidate = Object.values(source).find((value) =>
-    value.ConsoleBucketName && value.ContentBucketName && value.ContentUrl && value.CloudFrontPublicKeyId,
-  );
-  if (!candidate) throw new Error(`CDK outputs are incomplete: ${file}`);
-  return candidate as unknown as StackOutputs;
 }

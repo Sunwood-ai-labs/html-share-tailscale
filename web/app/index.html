@@ -11,7 +11,7 @@
 <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<!-- crossorigin は必須。これが無いと manifest だけ Cookie 無しで取りに行き 403 になる -->
+<!-- Tailscale Serve経由でも、同じオリジンのアプリとしてmanifestを読む -->
 <link rel="manifest" href="/app.webmanifest" crossorigin="use-credentials">
 <meta name="apple-mobile-web-app-title" content="HTML共有くん">
 <!-- 上バーの上端と同じ色。ここがずれるとステータスバーの周りが継ぎはぎになる -->
@@ -562,7 +562,7 @@ body.page-controls-hidden #page-actions {
     </button>
   </div>
   <div id="page-share-panel" aria-label="共有URLの発行" hidden>
-    <label>公開範囲<select id="page-share-scope"><option value="i">社内限定</option><option value="p">IP制限なし</option></select></label>
+    <label>アクセス範囲<select id="page-share-scope"><option value="i">Tailnet内（Tailscale）</option></select></label>
     <label>有効日数<select id="page-share-days"><option>1</option><option>3</option><option selected>7</option><option>14</option><option>30</option><option>90</option></select></label>
     <button id="page-share-issue" type="button">発行してコピー</button>
   </div>
@@ -580,7 +580,7 @@ body.page-controls-hidden #page-actions {
   const STAR_KEY = 'mb_starred_pages';
   const HIDDEN_KEY = 'mb_hidden_pages';
   const READ_KEY = 'mb_read_marks';
-  const CAN_SYNC = location.protocol === 'https:';
+  const CAN_SYNC = location.protocol === 'https:' || location.hostname === '127.0.0.1';
   let allPages = [], pages = [], current = null, meta = null;
   let starred = new Set();
   let hiddenSources = new Set();
@@ -651,27 +651,16 @@ body.page-controls-hidden #page-actions {
     return true;
   }
 
-  async function sha256(value) {
-    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-    return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  }
-
   async function preferencesApi(options = {}) {
     const body = options.body;
     const headers = { ...(options.headers ?? {}) };
-    if (body) {
-      headers['content-type'] = 'application/json';
-      headers['x-amz-content-sha256'] = await sha256(body);
-    }
+    if (body) headers['content-type'] = 'application/json';
     const response = await fetch('/api/owner/preferences', {
       cache: 'no-store',
       ...options,
       headers,
     });
-    if (response.status === 401) {
-      location.href = '/login.html';
-      throw new Error('認証が必要です');
-    }
+    if (response.status === 401) throw new Error('Tailscale接続が必要です');
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error ?? '表示設定の保存に失敗しました');
     return payload;
@@ -889,7 +878,7 @@ body.page-controls-hidden #page-actions {
       mark.className = 'sh';
       const isOpen = page.shareMode === 'public';
       mark.textContent = isOpen ? '🌐' : '🔗';
-      mark.title = isOpen ? 'IP制限なしで公開中' : '社内IP限定の共有リンクあり';
+      mark.title = isOpen ? 'Tailnet内の期限付き共有リンクあり' : 'Tailnet内の共有リンクあり';
       button.append(mark);
     }
 
@@ -1234,11 +1223,6 @@ body.page-controls-hidden #page-actions {
     const mode = $('page-share-scope').value;
     const days = Number($('page-share-days').value);
     if (!Number.isInteger(days) || days < 1 || days > 90) return;
-    if (
-      mode === 'p' &&
-      !confirm(`「${page.title}」をIP制限なしで${days}日間共有します。よろしいですか？`)
-    ) return;
-
     pageShareIssue.disabled = true;
     pageShareIssue.textContent = '発行中…';
     let generatedUrl = '';

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Qwen3.8-27B無料エンドポイントの簡易実測を一枚でまとめたスライド">
+  <title>Qwen3.8-27B — 使える。ただし、実験用。</title>
+  <style>
+    :root {
+      --canvas: #e9eef5;
+      --paper: #fbfcfe;
+      --ink: #172033;
+      --muted: #687386;
+      --line: #d9e1ec;
+      --navy: #0a1222;
+      --navy-2: #101e37;
+      --blue: #0b63f6;
+      --cyan: #20c8dc;
+      --gold: #f3bd58;
+      --red: #d84c59;
+      --green: #18805d;
+      --shadow: 0 28px 72px rgba(25, 42, 69, .18), 0 4px 12px rgba(25, 42, 69, .08);
+      --display-font: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", sans-serif;
+      --mono-font: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--canvas); color-scheme: light; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(32, 200, 220, .13), transparent 26rem),
+        radial-gradient(circle at 92% 90%, rgba(11, 99, 246, .10), transparent 30rem),
+        var(--canvas);
+      color: var(--ink);
+      font-family: var(--display-font);
+      font-size: 16px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    a { color: inherit; text-underline-offset: .22em; }
+    a:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; border-radius: 4px; }
+
+    .stage { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
+
+    .slide {
+      position: relative;
+      display: grid;
+      width: min(1440px, calc(100vw - 48px), calc((100vh - 48px) * 16 / 9));
+      aspect-ratio: 16 / 9;
+      grid-template-columns: minmax(0, .90fr) minmax(0, 1.10fr);
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 0 30px;
+      padding: 27px 30px 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .85);
+      border-radius: 28px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .slide::after {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      content: "";
+      background: linear-gradient(90deg, transparent 0 53%, rgba(18, 42, 76, .035) 53% 53.12%, transparent 53.12%);
+    }
+    .slide > * { position: relative; z-index: 1; }
+
+    .masthead {
+      display: flex;
+      grid-column: 1 / -1;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-width: 0;
+      padding: 0 6px 17px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brandline, .date-line {
+      margin: 0;
+      color: var(--muted);
+      font-size: .70rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+    .brandline { color: var(--navy); }
+    .brandline::before {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      content: "";
+      vertical-align: 1px;
+    }
+
+    .verdict-panel {
+      position: relative;
+      display: flex;
+      grid-column: 1;
+      grid-row: 2 / 4;
+      min-width: 0;
+      min-height: 0;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding: clamp(25px, 3.2vw, 47px);
+      overflow: hidden;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 90% 18%, rgba(32, 200, 220, .30), transparent 16rem),
+        radial-gradient(circle at 12% 92%, rgba(11, 99, 246, .30), transparent 17rem),
+        linear-gradient(145deg, var(--navy) 0%, var(--navy-2) 100%);
+      color: #fff;
+    }
+    .verdict-panel::before, .verdict-panel::after {
+      position: absolute;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+    .verdict-panel::before { right: -18%; top: -20%; width: 62%; aspect-ratio: 1; }
+    .verdict-panel::after { right: -4%; top: -7%; width: 36%; aspect-ratio: 1; }
+    .panel-top, .panel-bottom { position: relative; z-index: 1; }
+    .kicker {
+      margin: 0;
+      color: var(--gold);
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .18em;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 9ch;
+      margin: clamp(18px, 2.2vw, 31px) 0 0;
+      font-size: clamp(3.05rem, 5.2vw, 5.45rem);
+      font-weight: 760;
+      letter-spacing: -.075em;
+      line-height: .98;
+      text-wrap: balance;
+    }
+    .panel-lead {
+      max-width: 34em;
+      margin: clamp(22px, 2.8vw, 38px) 0 0;
+      color: rgba(255, 255, 255, .72);
+      font-size: clamp(.82rem, 1.08vw, 1rem);
+      line-height: 1.75;
+    }
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: clamp(22px, 2.8vw, 38px);
+      padding: 9px 13px;
+      border: 1px solid rgba(243, 189, 88, .34);
+      border-radius: 999px;
+      background: rgba(243, 189, 88, .10);
+      color: #ffe1a1;
+      font-size: .74rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .verdict::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(243, 189, 88, .13);
+      content: "";
+    }
+    .panel-bottom {
+      display: grid;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 17px;
+      border-top: 1px solid rgba(255, 255, 255, .14);
+    }
+    .panel-bottom p { margin: 0; color: rgba(255, 255, 255, .62); font-size: .72rem; line-height: 1.5; }
+    .panel-bottom strong { display: block; margin-bottom: 3px; color: rgba(255, 255, 255, .95); font-family: var(--mono-font); font-size: .77rem; font-weight: 600; }
+
+    .analysis {
+      display: grid;
+      grid-column: 2;
+      grid-row: 2;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: clamp(15px, 1.7vw, 25px);
+      min-width: 0;
+      min-height: 0;
+      padding: 24px 8px 0 0;
+    }
+    .analysis-kicker {
+      margin: 0;
+      color: var(--blue);
+      font-size: .68rem;
+      font-weight: 850;
+      letter-spacing: .16em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+    h2 {
+      max-width: 18ch;
+      margin: 10px 0 0;
+      color: var(--navy);
+      font-size: clamp(1.8rem, 3.15vw, 3.2rem);
+      font-weight: 740;
+      letter-spacing: -.065em;
+      line-height: 1.04;
+      text-wrap: balance;
+    }
+    h2 em { color: var(--blue); font-style: normal; }
+
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid var(--line); }
+    .metric { min-width: 0; padding: 13px 15px 12px; }
+    .metric + .metric { border-left: 1px solid var(--line); }
+    .metric-value {
+      display: block;
+      color: var(--navy);
+      font-family: var(--mono-font);
+      font-size: clamp(1.4rem, 2.35vw, 2.55rem);
+      font-weight: 700;
+      letter-spacing: -.08em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .metric-label { display: block; margin-top: 8px; color: var(--muted); font-size: clamp(.66rem, .78vw, .77rem); line-height: 1.4; }
+    .metric-label code { color: var(--blue); font-family: var(--mono-font); font-size: .93em; }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.06fr) minmax(190px, .94fr);
+      gap: clamp(18px, 2vw, 30px);
+      min-height: 0;
+      align-items: start;
+    }
+    .evidence, .decision { min-width: 0; }
+    .mini-label { margin: 0 0 9px; color: var(--muted); font-size: .67rem; font-weight: 850; letter-spacing: .15em; line-height: 1.2; text-transform: uppercase; }
+    .quote {
+      margin: 0;
+      padding: 12px 0 12px 16px;
+      border-left: 3px solid var(--red);
+      color: var(--navy);
+      font-size: clamp(1rem, 1.35vw, 1.35rem);
+      font-weight: 720;
+      letter-spacing: -.035em;
+      line-height: 1.38;
+    }
+    .quote-note { margin: 12px 0 0 19px; color: var(--muted); font-size: clamp(.72rem, .84vw, .83rem); line-height: 1.6; }
+    .decision-list { display: grid; margin: 0; border-top: 1px solid var(--line); }
+    .decision-row { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .decision-row dt, .decision-row dd { margin: 0; }
+    .decision-row dt { font-family: var(--mono-font); font-size: .70rem; font-weight: 800; letter-spacing: .06em; }
+    .decision-row dd { color: var(--ink); font-size: clamp(.72rem, .84vw, .84rem); line-height: 1.35; }
+    .decision-row dd span { display: block; color: var(--muted); font-size: .87em; }
+    .good { color: var(--green); }
+    .check { color: #a47716; }
+    .avoid { color: var(--red); }
+
+    .source-line {
+      display: flex;
+      grid-column: 2;
+      grid-row: 3;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-width: 0;
+      padding: 15px 8px 0 0;
+      color: var(--muted);
+      font-size: .64rem;
+      line-height: 1.45;
+    }
+    .source-line p { margin: 0; }
+    .source-line a { color: var(--blue); font-weight: 700; }
+    .source-meta { flex: 0 0 auto; text-align: right; }
+    .source-meta strong { display: block; color: var(--navy); font-family: var(--mono-font); font-size: .68rem; font-weight: 650; }
+
+    @media (max-width: 760px) {
+      body { overflow-y: auto; }
+      .stage { display: block; min-height: auto; padding: 12px; }
+      .slide { display: block; width: 100%; aspect-ratio: auto; min-height: 0; overflow: visible; border-radius: 22px; padding: 18px; }
+      .masthead { padding: 0 3px 15px; }
+      .verdict-panel { min-height: 440px; margin-top: 17px; padding: 27px 24px; border-radius: 19px; }
+      h1 { max-width: 8ch; font-size: clamp(3.15rem, 16vw, 5.4rem); }
+      .analysis { display: block; padding: 28px 3px 0; }
+      h2 { max-width: 16ch; font-size: clamp(2rem, 9.5vw, 3.1rem); }
+      .metrics { margin-top: 23px; }
+      .metric { padding: 14px 12px 13px; }
+      .metric-value { font-size: clamp(1.3rem, 8vw, 2.2rem); }
+      .evidence-grid { grid-template-columns: 1fr; gap: 27px; margin-top: 27px; }
+      .source-line { display: block; padding: 28px 3px 3px; }
+      .source-meta { margin-top: 10px; text-align: left; }
+    }
+    @media (max-width: 480px) {
+      .masthead { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric:last-child { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
+      .metric-value { font-size: 1.65rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+    }
+    @media print {
+      html, body { background: #fff; }
+      .stage { min-height: auto; padding: 0; }
+      .slide { width: 100%; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <section class="slide" aria-labelledby="report-title">
+      <header class="masthead">
+        <p class="brandline">HANDS-ON / QWEN3.8-27B</p>
+        <p class="date-line">2026.08.16 · 1-SLIDE FIELD NOTE</p>
+      </header>
+
+      <aside class="verdict-panel" aria-label="結論">
+        <div class="panel-top">
+          <p class="kicker">Verdict / 01</p>
+          <h1 id="report-title">使える。<br>ただし、<br>実験用。</h1>
+          <p class="panel-lead">無料エンドポイントを実際に叩いて、接続・速度・回答品質を短時間で確認した。</p>
+          <p class="verdict">SHORT TASKS / OK · PRODUCTION / NO</p>
+        </div>
+        <div class="panel-bottom">
+          <p><strong>Qwen/Qwen3.8-27B</strong>Hugging Face Inference Endpoint · OpenAI-compatible API</p>
+          <p>READ-ONLY TEST · 公開ポストの要約のみ送信 · 各条件1回</p>
+        </div>
+      </aside>
+
+      <section class="analysis" aria-labelledby="finding-title">
+        <div>
+          <p class="analysis-kicker">What the endpoint actually did</p>
+          <h2 id="finding-title">短いリクエストなら約3秒。<br><em>速さと正確さは、別。</em></h2>
+        </div>
+
+        <div class="metrics" aria-label="実測値">
+          <article class="metric">
+            <strong class="metric-value">2.99s</strong>
+            <span class="metric-label"><code>reasoning=none</code><br>チャット生成 · 正常終了</span>
+          </article>
+          <article class="metric">
+            <strong class="metric-value">42.8s</strong>
+            <span class="metric-label">デフォルト思考<br>本文なし · length終了</span>
+          </article>
+          <article class="metric">
+            <strong class="metric-value">1.26s</strong>
+            <span class="metric-label"><code>/v1/models</code><br>モデル一覧の取得</span>
+          </article>
+        </div>
+
+        <div class="evidence-grid">
+          <article class="evidence" aria-labelledby="evidence-title">
+            <h3 id="evidence-title" class="mini-label">Critical observation</h3>
+            <blockquote class="quote">「Qwen3.8-27Bは<br>存在しない」</blockquote>
+            <p class="quote-note">短い分析の形式は成立。しかしモデルの存在認識は、公式モデルカードとAPIの一覧に反した。</p>
+          </article>
+
+          <article class="decision" aria-labelledby="decision-title">
+            <h3 id="decision-title" class="mini-label">Use-case decision</h3>
+            <dl class="decision-list">
+              <div class="decision-row"><dt class="good">GOOD</dt><dd>短い要約・アイデア出し<span>thinkingを切れば速い</span></dd></div>
+              <div class="decision-row"><dt class="check">CHECK</dt><dd>最新情報・仕様<span>一次情報で照合する</span></dd></div>
+              <div class="decision-row"><dt class="avoid">AVOID</dt><dd>機密データ・本番依存<span>可用性・保持・制限が未評価</span></dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <footer class="source-line">
+        <p><a href="https://huggingface.co/spaces/victor/Qwen3.8-27B-free-endpoint" target="_blank" rel="noopener noreferrer">公開案内Space</a> · <a href="https://huggingface.co/Qwen/Qwen3.8-27B" target="_blank" rel="noopener noreferrer">公式モデルカード</a> · <a href="https://x.com/tamanekokoro/status/2088587752443175286" target="_blank" rel="noopener noreferrer">対象ポスト</a></p>
+        <p class="source-meta"><strong>OBSERVED / 2026-08-16</strong>長時間安定性・レート制限・保持は未評価</p>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>

@@ -323,7 +323,7 @@
       const mark = document.createElement('span');
       const isOpen = page.shareMode === 'public';
       mark.textContent = isOpen ? '🌐' : '🔗';
-      mark.title = isOpen ? 'IP制限なしで公開中' : '社内IP限定の共有リンクあり';
+      mark.title = isOpen ? 'Tailnet内の期限付き共有リンクあり' : 'Tailnet内の共有リンクあり';
       meta.append(mark);
     }
     return meta;

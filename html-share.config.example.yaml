@@ -1,14 +1,13 @@
-ownerEmail: owner@example.com
-
-aws:
-  region: ap-northeast-1
-  consoleDomain: html-share-console.example.com
-  contentDomain: html-share-content.example.com
-  certificateArn: arn:aws:acm:us-east-1:111122223333:certificate/00000000-0000-4000-8000-000000000000
-  cognitoDomainPrefix: html-share-example
-  publicKeyPath: .html-share/keys/public.pem
-  privateKeyPath: .html-share/keys/private.pem
-  privateKeyParameterName: /html-share/cloudfront/private-key
+# ループバックだけで待ち受け、Tailscale Serveがこのプロセスへ中継します。
+server:
+  host: 127.0.0.1
+  port: 4311
+  publicUrl: https://madesk.example.ts.net:9222
+  dataDir: .html-share/data
+  siteDir: .html-share/site
+  tailscale:
+    hostname: madesk.example.ts.net
+    httpsPort: 9222
 
 content:
   roots:
@@ -20,9 +19,5 @@ content:
       repository: examples
       stream: demo
       streamLabel: デモ
-  ownerLinkDays: 30
   maximumShareDays: 30
   maximumAssetBytes: 10485760
-  # 社内限定URLを使う場合だけ、組織の出口IPをCIDRで指定します。
-  allowedInternalCidrs:
-    - 203.0.113.0/24

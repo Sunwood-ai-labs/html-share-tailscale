@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
-import { buildOnly, publish, share } from './publish.js';
-import { initializeKeys, storePrivateKey } from './keys.js';
+import { spawnSync } from 'node:child_process';
 import { addPageToConfig, loadConfig } from './config.js';
+import { localOrigin, startLocalServer } from './local-server.js';
+import { buildOnly, publish, share } from './publish.js';
 import {
   completeReviews,
   listInbox,
-  pair,
   pullReviews,
   pushReviews,
   stopWatching,
@@ -30,16 +30,15 @@ async function stdin(): Promise<string> {
 }
 
 function usage(): never {
-  console.error(`HTML共有くん
+  console.error(`HTML共有くん（ローカル + Tailscale）
 
 Usage:
   html-share build [--config file]
   html-share publish [--config file]
+  html-share serve [--config file]
+  html-share tailscale serve [--config file]
   html-share share <slug> [--days 7]
   html-share page add <path> [--title title]
-  html-share keys init [--overwrite]
-  html-share keys store [--overwrite]
-  html-share review pair <code> [--name name]
   html-share review push --session <id> [--file cards.json]
   html-share review pull [--session <id>]
   html-share review inbox
@@ -47,6 +46,38 @@ Usage:
   html-share review watch --session <id> [--timeout-minutes 240]
   html-share review stop --session <id>`);
   process.exit(2);
+}
+
+async function serve(config: ReturnType<typeof loadConfig>): Promise<void> {
+  const server = await startLocalServer(config);
+  console.log(JSON.stringify({
+    ok: true,
+    mode: 'tailscale',
+    localUrl: localOrigin(config),
+    tailscaleUrl: `${config.server.publicUrl}/app/index.html`,
+    siteRoot: config.server.siteDir,
+  }, null, 2));
+  await new Promise<void>((resolve) => {
+    const close = () => server.close(() => resolve());
+    process.once('SIGINT', close);
+    process.once('SIGTERM', close);
+  });
+}
+
+function tailscaleServe(config: ReturnType<typeof loadConfig>): void {
+  const result = spawnSync('tailscale', [
+    'serve',
+    '--bg',
+    `--https=${config.server.tailscale.httpsPort}`,
+    localOrigin(config),
+  ], { stdio: 'inherit', shell: false });
+  if (result.error) throw new Error(`Could not run tailscale: ${result.error.message}`);
+  if (result.status !== 0) throw new Error(`tailscale serve exited with status ${result.status}`);
+  console.log(JSON.stringify({
+    ok: true,
+    tailscaleUrl: `${config.server.publicUrl}/app/index.html`,
+    proxy: localOrigin(config),
+  }, null, 2));
 }
 
 async function main(): Promise<void> {
@@ -61,6 +92,15 @@ async function main(): Promise<void> {
   }
   if (command === 'publish') {
     console.log(JSON.stringify({ ok: true, ...(await publish(config)) }, null, 2));
+    return;
+  }
+  if (command === 'serve') {
+    await serve(config);
+    return;
+  }
+  if (command === 'tailscale') {
+    if (process.argv[3] !== 'serve') usage();
+    tailscaleServe(config);
     return;
   }
   if (command === 'share') {
@@ -78,32 +118,13 @@ async function main(): Promise<void> {
     console.log(JSON.stringify({ ok: true, added, path: pagePath }));
     return;
   }
-  if (command === 'keys') {
-    const action = process.argv[3];
-    if (action === 'init') {
-      const result = initializeKeys(config, flag('--overwrite'));
-      console.log(JSON.stringify({ ok: true, publicKeyPath: result.publicKeyPath, privateKeyPath: result.privateKeyPath }, null, 2));
-      return;
-    }
-    if (action === 'store') {
-      await storePrivateKey(config, flag('--overwrite'));
-      console.log(JSON.stringify({ ok: true, parameterName: config.aws.privateKeyParameterName }));
-      return;
-    }
-    usage();
-  }
   if (command === 'review') {
     const action = process.argv[3];
-    if (action === 'pair') {
-      const code = process.argv[4];
-      if (!code) usage();
-      console.log(JSON.stringify({ ok: true, deviceName: await pair(config, code, option('--name')) }));
-      return;
-    }
     if (action === 'push') {
       const sessionId = option('--session');
       if (!sessionId) usage();
-      const source = option('--file') ? readFileSync(option('--file')!, 'utf8') : await stdin();
+      const file = option('--file');
+      const source = file ? readFileSync(file, 'utf8') : await stdin();
       const input = JSON.parse(source) as ReviewCard | ReviewCard[];
       const cards = Array.isArray(input) ? input : [input];
       console.log(JSON.stringify({ ok: true, items: await pushReviews(config, sessionId, cards) }, null, 2));
@@ -115,8 +136,6 @@ async function main(): Promise<void> {
     }
     if (action === 'inbox') {
       const requests = await listInbox(config);
-      // The hint travels with the data so an agent that skipped the skill still closes what it
-      // picked up. A request left open is indistinguishable from one no computer has taken yet.
       const next = requests.length
         ? 'Oldest first. Close them all with `html-share review complete <id...>` before starting,'
           + ' then identify each request\'s working folder and work through them in order.'
@@ -152,7 +171,7 @@ async function main(): Promise<void> {
   usage();
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
+main().catch((caught: unknown) => {
+  console.error(caught instanceof Error ? caught.message : String(caught));
   process.exitCode = 1;
 });

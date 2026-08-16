@@ -5,7 +5,7 @@ description: Send the current Claude Code or Codex task to HTML共有くん for 
 
 # Mobile handoff
 
-Use the `html-share` CLI. Do not call the review API directly and do not print device tokens.
+Use the `html-share` CLI. Review data stays in the local state directory and is reachable through the user's Tailnet only.
 
 ## Stop
 
