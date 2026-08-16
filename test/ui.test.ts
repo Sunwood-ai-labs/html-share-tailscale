@@ -11,7 +11,8 @@ test('ships the full dashboard UI and inbox wording', () => {
   const list = readFileSync(path.join(root, 'web', 'page-list.js'), 'utf8');
   const shell = readFileSync(path.join(root, 'web', 'mobile-page-shell.js'), 'utf8');
 
-  assert.match(dashboard, /HTML共有くん/);
+  assert.match(dashboard, /最新TL;DR/);
+  assert.doesNotMatch(dashboard, /確認・返信を、/);
   assert.match(dashboard, /インボックス/);
   assert.match(dashboard, /未読に戻す/);
   assert.match(dashboard, /groupByStream/);

@@ -7,13 +7,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="color-scheme" content="light">
-<title>HTML共有くん</title>
+<title>最新TL;DR｜Tailnet Dashboard</title>
 <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <!-- Tailscale Serve経由でも、同じオリジンのアプリとしてmanifestを読む -->
 <link rel="manifest" href="/app.webmanifest" crossorigin="use-credentials">
-<meta name="apple-mobile-web-app-title" content="HTML共有くん">
+<meta name="apple-mobile-web-app-title" content="最新TL;DR">
 <!-- 上バーの上端と同じ色。ここがずれるとステータスバーの周りが継ぎはぎになる -->
 <meta name="theme-color" content="#161C26">
 <!-- 一覧の見た目と描画の正本。スマホの個別ページ側も同じものを読む -->
@@ -985,9 +985,9 @@ body.searching .search {
       <header class="topbar">
         <div class="topbar-inner">
           <div class="nav-context">
-            <button class="brand" id="brand" type="button" title="トップへ戻る">
+            <button class="brand" id="brand" type="button" title="最新TL;DRへ戻る">
               <img class="brand-mark" src="/icons/icon-192.png" alt="" width="36" height="36">
-              <span class="brand-copy"><span class="label">HTML共有くん</span><span class="brand-sub">TAILNET CONSOLE</span></span>
+              <span class="brand-copy"><span class="label">最新TL;DR</span><span class="brand-sub">TAILNET DIGEST</span></span>
             </button>
             <div class="nav-status" aria-label="共有ページの状態" aria-live="polite">
               <span class="nav-status-label">LIVE</span>
@@ -1617,25 +1617,15 @@ body.searching .search {
     }
   }
 
-  async function renderDigest() {
-    const latest = [...pages]
+  function latestDigestPages() {
+    return [...pages]
       .sort((a, b) => new Date(b.date ?? b.updatedAt) - new Date(a.date ?? a.updatedAt))
       .slice(0, DIGEST_LIMIT);
-    heroDigest.replaceChildren();
-    if (latest.length === 0) {
-      heroSummary.textContent = '表示できる更新はありません。';
-      const empty = document.createElement('li');
-      empty.className = 'digest-loading';
-      empty.textContent = 'ページが追加されると、ここに要点が出ます。';
-      heroDigest.append(empty);
-      return;
-    }
+  }
 
-    const summaries = await Promise.all(latest.map(async (page) => ({
-      page,
-      summary: await readPageDigest(page),
-    })));
+  function paintDigest(summaries) {
     heroSummary.textContent = `${summaries.length}件の最新ページを横断した要点`;
+    heroDigest.replaceChildren();
     summaries.forEach(({ page, summary }, index) => {
       const item = document.createElement('li');
       item.className = 'digest-item';
@@ -1662,6 +1652,33 @@ body.searching .search {
     });
   }
 
+  let digestRenderVersion = 0;
+
+  async function renderDigest() {
+    const renderVersion = ++digestRenderVersion;
+    const latest = latestDigestPages();
+    heroDigest.replaceChildren();
+    if (latest.length === 0) {
+      heroSummary.textContent = '表示できる更新はありません。';
+      const empty = document.createElement('li');
+      empty.className = 'digest-loading';
+      empty.textContent = 'ページが追加されると、ここに要点が出ます。';
+      heroDigest.append(empty);
+      return;
+    }
+
+    // 子ページの本文を待たず、まずmanifestのタイトルで要約を即時表示する。
+    // これで読み込み中に固定のブランド表示だけが残ることを防ぐ。
+    paintDigest(latest.map((page) => ({ page, summary: digestFallback(page) })));
+
+    const summaries = await Promise.all(latest.map(async (page) => ({
+      page,
+      summary: await readPageDigest(page),
+    })));
+    if (renderVersion !== digestRenderVersion) return;
+    paintDigest(summaries);
+  }
+
   function select(slug) {
     current = pages.find((p) => p.slug === slug) ?? null;
     document.body.classList.toggle('page-open', Boolean(current));
@@ -1673,12 +1690,12 @@ body.searching .search {
       frame.removeAttribute('src');
       renderHome();
       home.classList.add('on');
-      document.title = 'HTML共有くん';
+      document.title = '最新TL;DR｜Tailnet Dashboard';
     } else {
       home.classList.remove('on');
       frame.hidden = false;
       frame.src = current.href;
-      document.title = `${current.title}｜HTML共有くん`;
+      document.title = `${current.title}｜最新TL;DR`;
       // ブックマークやURL直打ちで開いた場合もここを通るので、未読解除はまとめてここで行う
       markRead(current);
     }
