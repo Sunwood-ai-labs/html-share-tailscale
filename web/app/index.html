@@ -904,6 +904,77 @@ body.searching .search {
   .nav-status { display: none; }
   .topbar-actions { gap: .2rem; padding: .2rem; border-radius: .9rem; }
 }
+
+/* ── Live digest ──────────────────────────────────────────────
+   ヒーローを固定の製品コピーではなく、manifest内の最新ページ要約にする。 */
+.dashboard-hero h1 { max-width: none; }
+.dashboard-hero h1 em { display: inline; }
+.hero-lead#hero-summary { margin-top: .75rem; }
+.digest-list {
+  display: grid;
+  gap: .45rem;
+  max-width: 43rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.digest-item {
+  display: grid;
+  grid-template-columns: 1.55rem minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .55rem;
+  padding: .55rem .65rem;
+  border: 1px solid rgba(233, 217, 182, .15);
+  border-radius: .7rem;
+  background: rgba(233, 217, 182, .055);
+}
+.digest-index {
+  padding-top: .08rem;
+  color: var(--rock-cyan);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+}
+.digest-copy { display: grid; min-width: 0; gap: .12rem; }
+.digest-title {
+  overflow: hidden;
+  color: var(--rock-paper);
+  font-size: .73rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.digest-text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(233, 217, 182, .62);
+  font-size: .68rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.digest-item time {
+  padding-top: .08rem;
+  color: rgba(233, 217, 182, .48);
+  font-size: .62rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.digest-loading {
+  padding: .7rem;
+  border: 1px dashed rgba(233, 217, 182, .2);
+  border-radius: .7rem;
+  color: rgba(233, 217, 182, .58);
+  font-size: .7rem;
+}
+@media (max-width: 46rem) {
+  .digest-list { margin-top: .85rem; }
+  .digest-item { grid-template-columns: 1.4rem minmax(0, 1fr); }
+  .digest-item time { display: none; }
+  .digest-title { font-size: .7rem; }
+  .digest-text { font-size: .66rem; }
+}
 </style>
 </head>
 <body>
@@ -948,9 +1019,12 @@ body.searching .search {
       <div class="home-content">
         <section class="dashboard-hero" aria-labelledby="dashboard-title">
           <div class="hero-copy">
-            <p class="hero-kicker"><span class="hero-signal-dot"></span>TAILNET CONSOLE</p>
-            <h1 id="dashboard-title">確認・返信を、<em>ここから。</em></h1>
-            <p class="hero-lead">PCで作ったHTMLを、このTailnetの次の画面へ。</p>
+            <p class="hero-kicker"><span class="hero-signal-dot"></span>LATEST DIGEST / TAILNET</p>
+            <h1 id="dashboard-title">最新の<em>TL;DR</em></h1>
+            <p class="hero-lead" id="hero-summary">最新ページの内容をまとめています。</p>
+            <ul class="digest-list" id="hero-digest" aria-label="最新ページの要約">
+              <li class="digest-loading">最新ページを読み込み中…</li>
+            </ul>
             <div class="hero-stats" aria-label="ダッシュボードの状態">
               <div class="hero-stat"><strong id="hero-page-count">—</strong><span>表示中</span></div>
               <div class="hero-stat"><strong id="hero-updated">—</strong><span>最終同期</span></div>
@@ -1006,6 +1080,7 @@ body.searching .search {
   const $ = (id) => document.getElementById(id);
   const frame = $('frame'), home = $('home'), tilesEl = $('tiles'), brandMeta = $('brand-meta'), brandSync = $('brand-sync');
   const heroPageCount = $('hero-page-count'), heroUpdated = $('hero-updated');
+  const heroSummary = $('hero-summary'), heroDigest = $('hero-digest');
   const searchBox = $('search'), searchToggle = $('search-toggle'), searchClear = $('search-clear');
   const refresh = $('refresh'), pageRefresh = $('page-refresh');
   const pageMore = $('page-more'), pageMenu = $('page-menu'), pageSharePanel = $('page-share-panel');
@@ -1208,6 +1283,7 @@ body.searching .search {
     updateTrashToggle();
     try {
       await savePreferencesNow();
+      renderDigest().catch((error) => console.warn('ページ要約の更新に失敗しました', error));
       location.hash = '#/';
     } catch (error) {
       hiddenSources = previousHidden;
@@ -1238,6 +1314,7 @@ body.searching .search {
     updateTrashToggle();
     renderHome();
     setStamp();
+    renderDigest().catch((error) => console.warn('ページ要約の更新に失敗しました', error));
   }
 
   function toggleStar(page) {
@@ -1505,6 +1582,86 @@ body.searching .search {
     heroUpdated.textContent = shortTime(meta.generatedAt) || '—';
   }
 
+  const DIGEST_LIMIT = 4;
+  const DIGEST_CHAR_LIMIT = 118;
+
+  function compactDigestText(value) {
+    const normalized = String(value ?? '').replace(/\s+/g, ' ').trim();
+    if (!normalized) return '';
+    if (normalized.length <= DIGEST_CHAR_LIMIT) return normalized;
+    const clipped = normalized.slice(0, DIGEST_CHAR_LIMIT).replace(/\s+\S*$/, '');
+    return `${clipped || normalized.slice(0, DIGEST_CHAR_LIMIT)}…`;
+  }
+
+  function digestFallback(page) {
+    const stream = page.streamLabel ?? page.repository ?? '';
+    return stream ? `${page.title}（${stream}）` : page.title;
+  }
+
+  async function readPageDigest(page) {
+    const fallback = digestFallback(page);
+    if (!page.href) return fallback;
+    try {
+      const url = new URL(page.href, location.href);
+      if (url.origin !== location.origin || !url.pathname.startsWith('/content/')) return fallback;
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) return fallback;
+      const html = await response.text();
+      const document = new DOMParser().parseFromString(html, 'text/html');
+      const description = document.querySelector('meta[name="description"]')?.getAttribute('content');
+      const lead = document.querySelector('.lead, [data-summary], article p, main p, p.copy')?.textContent;
+      return compactDigestText(description || lead) || fallback;
+    } catch (error) {
+      console.warn('ページ要約の取得に失敗しました', page.href, error);
+      return fallback;
+    }
+  }
+
+  async function renderDigest() {
+    const latest = [...pages]
+      .sort((a, b) => new Date(b.date ?? b.updatedAt) - new Date(a.date ?? a.updatedAt))
+      .slice(0, DIGEST_LIMIT);
+    heroDigest.replaceChildren();
+    if (latest.length === 0) {
+      heroSummary.textContent = '表示できる更新はありません。';
+      const empty = document.createElement('li');
+      empty.className = 'digest-loading';
+      empty.textContent = 'ページが追加されると、ここに要点が出ます。';
+      heroDigest.append(empty);
+      return;
+    }
+
+    const summaries = await Promise.all(latest.map(async (page) => ({
+      page,
+      summary: await readPageDigest(page),
+    })));
+    heroSummary.textContent = `${summaries.length}件の最新ページを横断した要点`;
+    summaries.forEach(({ page, summary }, index) => {
+      const item = document.createElement('li');
+      item.className = 'digest-item';
+
+      const order = document.createElement('span');
+      order.className = 'digest-index';
+      order.textContent = String(index + 1).padStart(2, '0');
+
+      const copy = document.createElement('span');
+      copy.className = 'digest-copy';
+      const title = document.createElement('strong');
+      title.className = 'digest-title';
+      title.textContent = page.title;
+      const text = document.createElement('span');
+      text.className = 'digest-text';
+      text.textContent = summary;
+      copy.append(title, text);
+
+      const time = document.createElement('time');
+      time.dateTime = page.date ?? page.updatedAt ?? '';
+      time.textContent = shortTime(page.date ?? page.updatedAt);
+      item.append(order, copy, time);
+      heroDigest.append(item);
+    });
+  }
+
   function select(slug) {
     current = pages.find((p) => p.slug === slug) ?? null;
     document.body.classList.toggle('page-open', Boolean(current));
@@ -1718,6 +1875,7 @@ body.searching .search {
       meta = data;
       allPages = data.pages ?? [];
       await loadPreferences();
+      await renderDigest();
       select(location.hash.replace(/^#\//, ''));
       refreshInboxDot();
     })
