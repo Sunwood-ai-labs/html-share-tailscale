@@ -49,7 +49,9 @@ content:
     const origin = localOrigin(config);
     const home = await fetch(`${origin}/app/index.html`);
     assert.equal(home.status, 200);
-    assert.match(await home.text(), /最新TL;DR/);
+    const homeHtml = await home.text();
+    assert.match(homeHtml, /HTML共有くん/);
+    assert.match(homeHtml, /最新の<em>TL;DR<\/em>/);
 
     const manifest = await fetch(`${origin}/app/manifest.json`);
     assert.equal(manifest.status, 200);

@@ -7,13 +7,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="color-scheme" content="light">
-<title>最新TL;DR｜Tailnet Dashboard</title>
+<title>HTML共有くん</title>
 <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <!-- Tailscale Serve経由でも、同じオリジンのアプリとしてmanifestを読む -->
 <link rel="manifest" href="/app.webmanifest" crossorigin="use-credentials">
-<meta name="apple-mobile-web-app-title" content="最新TL;DR">
+<meta name="apple-mobile-web-app-title" content="HTML共有くん">
 <!-- 上バーの上端と同じ色。ここがずれるとステータスバーの周りが継ぎはぎになる -->
 <meta name="theme-color" content="#161C26">
 <!-- 一覧の見た目と描画の正本。スマホの個別ページ側も同じものを読む -->
@@ -985,9 +985,9 @@ body.searching .search {
       <header class="topbar">
         <div class="topbar-inner">
           <div class="nav-context">
-            <button class="brand" id="brand" type="button" title="最新TL;DRへ戻る">
+            <button class="brand" id="brand" type="button" title="トップへ戻る">
               <img class="brand-mark" src="/icons/icon-192.png" alt="" width="36" height="36">
-              <span class="brand-copy"><span class="label">最新TL;DR</span><span class="brand-sub">TAILNET DIGEST</span></span>
+              <span class="brand-copy"><span class="label">HTML共有くん</span><span class="brand-sub">TAILNET CONSOLE</span></span>
             </button>
             <div class="nav-status" aria-label="共有ページの状態" aria-live="polite">
               <span class="nav-status-label">LIVE</span>
@@ -1690,12 +1690,12 @@ body.searching .search {
       frame.removeAttribute('src');
       renderHome();
       home.classList.add('on');
-      document.title = '最新TL;DR｜Tailnet Dashboard';
+      document.title = 'HTML共有くん';
     } else {
       home.classList.remove('on');
       frame.hidden = false;
       frame.src = current.href;
-      document.title = `${current.title}｜最新TL;DR`;
+      document.title = `${current.title}｜HTML共有くん`;
       // ブックマークやURL直打ちで開いた場合もここを通るので、未読解除はまとめてここで行う
       markRead(current);
     }
