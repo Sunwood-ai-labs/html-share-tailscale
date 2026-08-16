@@ -15,6 +15,32 @@
 
 <p align="center"><a href="README.md">English</a> · <a href="README.ja.md">日本語</a></p>
 
+## 🖼️ 画面イメージ
+
+現在のダッシュボードは、Tailnet Rockの壁紙を透過パネル越しに見せる構成です。デスクトップでもスマホでも、背景の世界観と文字の読みやすさを両立しています。
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-desktop.png" alt="HTML Share Tailscaleのデスクトップ画面" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-mobile.png" alt="HTML Share Tailscaleのスマホ画面" width="390">
+</p>
+
+<details>
+<summary>一覧部分が見えるスクロール位置の画面</summary>
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-desktop-sections.png" alt="HTML Share Tailscaleのデスクトップ一覧画面" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-mobile-sections.png" alt="HTML Share Tailscaleのスマホ一覧画面" width="390">
+</p>
+</details>
+
+確認済みのTailnet UIをリポジトリ内の画像として同梱しています。READMEには内部Tailnet URLを埋め込んでいないため、Tailnetへ接続していない状態でもGitHub上で画面を確認できます。
+
 HTML Share — Tailscaleは、エージェントが作ったHTMLレポートをこのPCへ保存して一覧化し、Tailscale Serve経由でスマホや同じTailnetのPCから確認・返信できるようにします。
 
 このリポジトリは [`minorun365/html-share`](https://github.com/minorun365/html-share) から分岐した独立運用のTailscale版です。AWS、S3、CloudFront、Lambda、外部データベースは前提にしません。

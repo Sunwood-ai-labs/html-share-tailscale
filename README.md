@@ -15,6 +15,32 @@
 
 <p align="center"><a href="README.md">English</a> · <a href="README.ja.md">日本語</a></p>
 
+## 🖼️ Screenshots
+
+The current dashboard uses the Tailnet Rock wallpaper with translucent panels, so the desktop and mobile layouts keep the visual context visible while preserving text contrast.
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-desktop.png" alt="HTML Share Tailscale dashboard on desktop" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-mobile.png" alt="HTML Share Tailscale dashboard on a phone" width="390">
+</p>
+
+<details>
+<summary>Scrolled dashboard captures</summary>
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-desktop-sections.png" alt="HTML Share Tailscale dashboard sections on desktop" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/dashboard-tailnet-rock-mobile-sections.png" alt="HTML Share Tailscale dashboard sections on a phone" width="390">
+</p>
+</details>
+
+These are repository-local captures from the verified Tailnet UI. The README does not embed an internal Tailnet URL, so the images remain viewable from GitHub without Tailnet access.
+
 HTML Share stores pages and review state on the host PC, then exposes the dashboard through Tailscale Serve so a phone or another Tailnet device can read and respond.
 
 This repository is an independent Tailscale-first fork of [`minorun365/html-share`](https://github.com/minorun365/html-share). The application does not require AWS, S3, CloudFront, Lambda, or an external database.
