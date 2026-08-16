@@ -5,6 +5,10 @@
 </div>
 
 <p align="center">
+  <img src="assets/brand/html-share-tailscale-app-icon.png" alt="HTML共有くんのアプリアイコン" width="96">
+</p>
+
+<p align="center">
   <a href="https://github.com/Sunwood-ai-labs/html-share-tailscale/actions/workflows/ci.yml"><img src="https://github.com/Sunwood-ai-labs/html-share-tailscale/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-4c6fff.svg" alt="License: Apache-2.0"></a>
 </p>
@@ -24,6 +28,8 @@ HTML共有くんは、エージェントが作ったHTMLレポートをこのPC�
 - PC上のエージェントとスマホの `/mobile`・`/inbox` で依頼や確認を受け渡す
 
 ヘッダーの赤い尻尾は、HTMLがローカル保存からTailnetを通って次の画面へ届く流れを表しています。鳥居のようなゲートはアクセス境界、電光青のノードは非同期の受け渡しです。
+
+アプリアイコンは、狐火のシルエットと青い接続点だけに絞りました。ファビコン、PWA、スマホのホーム画面でも遠目から判別できるようにしています。
 
 ## 🚀 まず動かす
 

@@ -5,6 +5,10 @@
 </div>
 
 <p align="center">
+  <img src="assets/brand/html-share-tailscale-app-icon.png" alt="HTML Share Tailscale app icon" width="96">
+</p>
+
+<p align="center">
   <a href="https://github.com/Sunwood-ai-labs/html-share-tailscale/actions/workflows/ci.yml"><img src="https://github.com/Sunwood-ai-labs/html-share-tailscale/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-4c6fff.svg" alt="License: Apache-2.0"></a>
 </p>
@@ -24,6 +28,8 @@ This repository is an independent Tailscale-first fork of [`minorun365/html-shar
 - Move requests between an agent running on the PC and the `/mobile` or `/inbox` views on a phone.
 
 The red tail in the header is deliberate: it represents a report leaving local storage, crossing the Tailnet, and arriving at the next screen. The torii-like gateway represents the access boundary; the cyan nodes represent asynchronous handoff.
+
+The compact app icon uses a single fox-fire silhouette and one cyan connection point so it remains recognizable as a favicon, PWA icon, and phone home-screen icon.
 
 ## 🚀 Quick start
 
