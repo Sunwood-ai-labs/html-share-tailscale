@@ -834,6 +834,76 @@ body.searching .search {
   .row .fresh-label { display: inline-flex; }
   #home-btn, #page-more { width: 2.75rem; height: 2.75rem; border-radius: .9rem; }
 }
+
+/* ── Navigation hierarchy repair ─────────────────────────────
+   ブランド・状態・操作を別グループにし、本文のヒーローと同じ横幅で揃える。 */
+.topbar-inner { height: 4.5rem; }
+.nav-context {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  min-width: 0;
+  flex: 1;
+}
+.nav-status {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-width: 0;
+  min-height: 2.35rem;
+  padding: .35rem .75rem;
+  border-left: 1px solid rgba(233, 217, 182, .24);
+  border-radius: .55rem;
+  background: rgba(233, 217, 182, .055);
+  white-space: nowrap;
+}
+.nav-status-label {
+  color: var(--rock-cyan);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+.brand-meta {
+  flex: none;
+  color: var(--rock-paper);
+  font-size: .72rem;
+  font-weight: 750;
+}
+.brand-sync {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(233, 217, 182, .58);
+  font-size: .65rem;
+  font-variant-numeric: tabular-nums;
+}
+.topbar-actions {
+  flex: none;
+  margin-left: auto;
+  gap: .3rem;
+  padding: .25rem;
+  border: 1px solid rgba(233, 217, 182, .18);
+  border-radius: 1rem;
+  background: rgba(233, 217, 182, .055);
+}
+.topbar-actions .tb-btn,
+.topbar-actions .search {
+  border-color: transparent;
+  background: transparent;
+}
+.topbar-actions .tb-btn:hover,
+.topbar-actions .search:hover,
+.topbar-actions .search:focus-within {
+  border-color: rgba(27, 195, 211, .65);
+  background: rgba(27, 195, 211, .12);
+}
+.topbar-actions .tb-btn:active { background: rgba(233, 217, 182, .14); }
+
+@media (max-width: 46rem) {
+  .topbar-inner { height: 4rem; }
+  .nav-status { display: none; }
+  .topbar-actions { gap: .2rem; padding: .2rem; border-radius: .9rem; }
+}
 </style>
 </head>
 <body>
@@ -843,11 +913,17 @@ body.searching .search {
     <div id="home" class="on">
       <header class="topbar">
         <div class="topbar-inner">
-          <button class="brand" id="brand" type="button" title="トップへ戻る">
-            <img class="brand-mark" src="/icons/icon-192.png" alt="" width="36" height="36">
-            <span class="brand-copy"><span class="label">HTML共有くん</span><span class="brand-sub">TAILNET CONSOLE</span></span>
-          </button>
-          <span class="brand-meta" id="brand-meta"></span>
+          <div class="nav-context">
+            <button class="brand" id="brand" type="button" title="トップへ戻る">
+              <img class="brand-mark" src="/icons/icon-192.png" alt="" width="36" height="36">
+              <span class="brand-copy"><span class="label">HTML共有くん</span><span class="brand-sub">TAILNET CONSOLE</span></span>
+            </button>
+            <div class="nav-status" aria-label="共有ページの状態" aria-live="polite">
+              <span class="nav-status-label">LIVE</span>
+              <span class="brand-meta" id="brand-meta"></span>
+              <span class="brand-sync" id="brand-sync"></span>
+            </div>
+          </div>
           <div class="topbar-actions">
             <div class="search" id="search">
               <button id="search-toggle" type="button" aria-label="検索する" aria-expanded="false">
@@ -928,7 +1004,7 @@ body.searching .search {
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
-  const frame = $('frame'), home = $('home'), tilesEl = $('tiles'), brandMeta = $('brand-meta');
+  const frame = $('frame'), home = $('home'), tilesEl = $('tiles'), brandMeta = $('brand-meta'), brandSync = $('brand-sync');
   const heroPageCount = $('hero-page-count'), heroUpdated = $('hero-updated');
   const searchBox = $('search'), searchToggle = $('search-toggle'), searchClear = $('search-clear');
   const refresh = $('refresh'), pageRefresh = $('page-refresh');
@@ -1423,7 +1499,8 @@ body.searching .search {
 
   function setStamp() {
     if (!meta) return;
-    brandMeta.textContent = `${pages.length}ページ ／ ${fmtDateTime(meta.generatedAt)} 更新`;
+    brandMeta.textContent = `${pages.length}ページ`;
+    brandSync.textContent = `${fmtDateTime(meta.generatedAt)} 更新`;
     heroPageCount.textContent = String(pages.length).padStart(2, '0');
     heroUpdated.textContent = shortTime(meta.generatedAt) || '—';
   }
