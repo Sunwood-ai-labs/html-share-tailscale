@@ -19,6 +19,7 @@
 <!-- 一覧の見た目と描画の正本。スマホの個別ページ側も同じものを読む -->
 <script src="/page-list.js"></script>
 <script>MyBriefsList.injectIntoHead();</script>
+<script src="/app/wallpaper.js"></script>
 <style>
 :root {
   --blue-deep: #0e0d6a;
@@ -63,16 +64,39 @@
   --repository-mid: linear-gradient(90deg, #0a4695, #0862aa);
   --repository-bright: linear-gradient(90deg, #0862aa, #01b6ec);
   --repository-soft: linear-gradient(90deg, #7db8df, #cfe0f2);
+  --wallpaper-image: none;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; background: var(--bg); }
+html, body { height: 100%; background: transparent; }
 body {
+  position: relative;
+  isolation: isolate;
   margin: 0;
-  background: var(--bg);
+  background: transparent;
   color: var(--ink);
   font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
   font-size: 15px;
   -webkit-text-size-adjust: 100%;
+}
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+body::before {
+  z-index: -2;
+  background-color: #161c26;
+  background-image: var(--wallpaper-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: .82;
+}
+body::after {
+  z-index: -1;
+  background: linear-gradient(115deg, rgba(247, 240, 226, .72), rgba(247, 240, 226, .56) 54%, rgba(247, 240, 226, .68));
 }
 .app { display: flex; height: 100%; }
 main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -419,16 +443,16 @@ body.page-controls-hidden #page-actions {
   body:not(.page-open) .app {
     height: auto;
     min-height: 100dvh;
-    background: var(--bg);
+    background: transparent;
   }
   body:not(.page-open) main {
     min-height: 100dvh;
-    background: var(--bg);
+    background: transparent;
   }
   body:not(.page-open) #home {
     flex: none;
     overflow-y: visible;
-    background: var(--bg);
+    background: transparent;
   }
   /* Dynamic Island の周りは、幅いっぱい同じ色にする。
      上端に接する色は theme-color・html の背景・PWAのステータスバーからも決まるが、
@@ -537,7 +561,7 @@ body.page-controls-hidden #page-actions {
   --repository-soft: linear-gradient(90deg, var(--rock-paper-2), var(--line));
 }
 
-html, body { background: var(--bg); }
+html, body { background: transparent; }
 body {
   color: var(--ink);
   font-family: "Avenir Next", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 
@@ -10,6 +10,7 @@ test('ships the full dashboard UI and inbox wording', () => {
   const review = readFileSync(path.join(root, 'web', 'review', 'index.html'), 'utf8');
   const list = readFileSync(path.join(root, 'web', 'page-list.js'), 'utf8');
   const shell = readFileSync(path.join(root, 'web', 'mobile-page-shell.js'), 'utf8');
+  const wallpaper = readFileSync(path.join(root, 'web', 'app', 'wallpaper.js'), 'utf8');
 
   assert.match(dashboard, /HTML Share — Tailscale/);
   assert.doesNotMatch(dashboard, /HTML共有くん/);
@@ -36,6 +37,20 @@ test('ships the full dashboard UI and inbox wording', () => {
   assert.match(dashboard, /id="review-dot"/);
   assert.match(dashboard, /function refreshInboxDot/);
   assert.match(dashboard, /\/api\/owner\/reviews/);
+  assert.match(dashboard, /\/app\/wallpaper\.js/);
+  assert.match(dashboard, /--wallpaper-image/);
+  assert.match(wallpaper, /max-width: 46rem/);
+  assert.match(wallpaper, /ROTATION_MS/);
+  for (const file of [
+    'desktop-01-lacquer-tail.png', 'desktop-02-washi-ink.png',
+    'desktop-03-signal-path.png', 'desktop-04-comet-tail.png',
+    'mobile-01-lacquer-tail.png', 'mobile-02-washi-ink.png',
+    'mobile-03-signal-path.png', 'mobile-04-comet-tail.png',
+  ]) {
+    const asset = path.join(root, 'web', 'app', 'wallpapers', file);
+    assert.ok(existsSync(asset), `wallpaper asset exists: ${file}`);
+    assert.ok(statSync(asset).size > 100_000, `wallpaper asset is not empty: ${file}`);
+  }
 });
 
 test('folds overflowing tables on the viewing origin without network access', () => {

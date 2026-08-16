@@ -54,6 +54,13 @@ content:
     assert.doesNotMatch(homeHtml, /HTML共有くん/);
     assert.match(homeHtml, /最新の<em>TL;DR<\/em>/);
 
+    const wallpaperScript = await fetch(`${origin}/app/wallpaper.js`);
+    assert.equal(wallpaperScript.status, 200);
+    assert.match(await wallpaperScript.text(), /DESKTOP_WALLPAPERS/);
+    const wallpaper = await fetch(`${origin}/app/wallpapers/mobile-03-signal-path.png`);
+    assert.equal(wallpaper.status, 200);
+    assert.match(wallpaper.headers.get('content-type') ?? '', /^image\/png/);
+
     const manifest = await fetch(`${origin}/app/manifest.json`);
     assert.equal(manifest.status, 200);
     assert.equal((await manifest.json()).pages.length, 1);
