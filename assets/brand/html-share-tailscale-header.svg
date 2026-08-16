@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
-  <title id="title">HTML共有くん — Tailnet Rock Edition</title>
+  <title id="title">HTML Share — Tailscale — Tailnet Rock Edition</title>
   <desc id="desc">A Japanese rock-inspired header with a vermilion tail, a geometric torii gateway, and a local-to-Tailnet network.</desc>
   <rect width="1600" height="520" fill="#09111f"/>
   <rect x="24" y="24" width="1552" height="472" rx="34" fill="#0d1a2d" stroke="#1c3857" stroke-width="2"/>
 
   <g opacity="0.22" fill="none" stroke="#2e5b78" stroke-width="2">
-    <path d="M24 116h1552M24 208h1552M24 300h1552M24 392h1552"/>
+    <path d="M24 208h1552M24 300h1552"/>
     <path d="M180 24v472M360 24v472M540 24v472M720 24v472M900 24v472M1080 24v472M1260 24v472M1440 24v472"/>
   </g>
 
@@ -23,7 +23,7 @@
   </g>
 
   <g font-family="Inter, Noto Sans JP, system-ui, sans-serif">
-    <text x="470" y="178" fill="#f7f2e8" font-size="70" font-weight="800" letter-spacing="2">HTML共有くん</text>
+    <text x="470" y="178" fill="#f7f2e8" font-size="70" font-weight="800" letter-spacing="2">HTML Share — Tailscale</text>
     <text x="474" y="246" fill="#79e7ee" font-size="25" font-weight="700" letter-spacing="7">TAILNET ROCK EDITION</text>
     <path d="M474 276h560" stroke="#e85a4f" stroke-width="8" stroke-linecap="round"/>
     <path d="M474 292h168" stroke="#f1b24d" stroke-width="4" stroke-linecap="round"/>

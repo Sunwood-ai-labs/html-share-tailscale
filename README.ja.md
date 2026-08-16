@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="assets/brand/html-share-tailscale-header.png" alt="HTML共有くん — Tailnet Rock Edition" width="100%">
-  <h1>HTML共有くん — Tailscale版</h1>
+  <img src="assets/brand/html-share-tailscale-header.png" alt="HTML Share — Tailscale — Tailnet Rock Edition" width="100%">
+  <h1>HTML Share — Tailscale</h1>
   <p>Claude Code・Codex・Cursorなどの成果をTailnet内だけで確認・レビューするHTMLダッシュボード。</p>
 </div>
 
 <p align="center">
-  <img src="assets/brand/html-share-tailscale-app-icon.png" alt="HTML共有くんのアプリアイコン" width="96">
+  <img src="assets/brand/html-share-tailscale-app-icon.png" alt="HTML Share — Tailscaleのアプリアイコン" width="96">
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
 
 <p align="center"><a href="README.md">English</a> · <a href="README.ja.md">日本語</a></p>
 
-HTML共有くんは、エージェントが作ったHTMLレポートをこのPCへ保存して一覧化し、Tailscale Serve経由でスマホや同じTailnetのPCから確認・返信できるようにします。
+HTML Share — Tailscaleは、エージェントが作ったHTMLレポートをこのPCへ保存して一覧化し、Tailscale Serve経由でスマホや同じTailnetのPCから確認・返信できるようにします。
 
 このリポジトリは [`minorun365/html-share`](https://github.com/minorun365/html-share) から分岐した独立運用のTailscale版です。AWS、S3、CloudFront、Lambda、外部データベースは前提にしません。
 

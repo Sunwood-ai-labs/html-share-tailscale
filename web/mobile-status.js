@@ -1,7 +1,7 @@
 (() => {
   if (!matchMedia('(max-width: 46rem)').matches) return;
 
-  // 共有くんが配るページの上端色はここ1か所に固定する。ダッシュボード（app/index.html）と
+  // HTML Share — Tailscaleが配るページの上端色はここ1か所に固定する。ダッシュボード（app/index.html）と
   // インボックス（review/index.html）の --safe-top と同じ値。
   // ページごとの theme-color を尊重していた頃は、トップと個別ページで
   // 画面を移った瞬間に Dynamic Island の色が変わって継ぎはぎに見えた（2026-08-13 実機で発覚）。

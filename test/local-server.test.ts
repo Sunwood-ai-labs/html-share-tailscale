@@ -50,7 +50,8 @@ content:
     const home = await fetch(`${origin}/app/index.html`);
     assert.equal(home.status, 200);
     const homeHtml = await home.text();
-    assert.match(homeHtml, /HTML共有くん/);
+    assert.match(homeHtml, /HTML Share — Tailscale/);
+    assert.doesNotMatch(homeHtml, /HTML共有くん/);
     assert.match(homeHtml, /最新の<em>TL;DR<\/em>/);
 
     const manifest = await fetch(`${origin}/app/manifest.json`);

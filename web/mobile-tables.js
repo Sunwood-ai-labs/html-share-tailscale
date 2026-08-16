@@ -162,7 +162,7 @@
     .mb-scroll-outer[data-mb-more="1"]::after { opacity: 1; }
   `;
 
-  /** 元ページの配色に関係なく読める最低限の色。共有くんのパレットに合わせる */
+  /** 元ページの配色に関係なく読める最低限の色。HTML Share — Tailscaleのパレットに合わせる */
   const palette = {
     '--mb-line': '#D7CBB7',
     '--mb-panel': '#FFFDF8',

@@ -2,7 +2,7 @@
 
 [ドキュメント入口](../index.md) · [English](../../guide/architecture.md)
 
-HTML共有くんは、1つのローカルoriginと、1つの意図したネットワーク入口で構成します。
+HTML Share — Tailscaleは、1つのローカルoriginと、1つの意図したネットワーク入口で構成します。
 
 ~~~text
 HTML + html-share.config.yaml

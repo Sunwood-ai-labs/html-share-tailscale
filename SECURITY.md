@@ -16,7 +16,7 @@ https://github.com/Sunwood-ai-labs/html-share-tailscale/security/advisories/new
 
 ## Deployment responsibility
 
-HTML共有くんは、利用者のPCとTailnetだけで動くセルフホスト型です。Tailscale ACL、配信するコンテンツ、共有URLの管理は各利用者が行います。
+HTML Share — Tailscaleは、利用者のPCとTailnetだけで動くセルフホスト型です。Tailscale ACL、配信するコンテンツ、共有URLの管理は各利用者が行います。
 
 本番依存関係は `npm run audit:prod` で検査します。公開前には、Tailnet外からURLへ到達できないことと、サーバーがループバックだけで待ち受けていることも確認してください。
 

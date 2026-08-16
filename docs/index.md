@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./brand/html-share-tailscale-mark.svg" alt="HTML共有くんのブランドマーク" width="96">
+  <img src="./brand/html-share-tailscale-mark.svg" alt="HTML Share — Tailscaleのブランドマーク" width="96">
 </p>
 
 # HTML Share documentation

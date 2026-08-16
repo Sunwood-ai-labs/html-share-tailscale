@@ -1,6 +1,6 @@
 ---
 name: inbox
-description: Read requests the owner placed in HTML共有くん from a phone and start them on this computer. Use when the user says /inbox, $inbox, or asks to pick up phone requests.
+description: Read requests the owner placed in HTML Share — Tailscale from a phone and start them on this computer. Use when the user says /inbox, $inbox, or asks to pick up phone requests.
 ---
 
 # Inbox

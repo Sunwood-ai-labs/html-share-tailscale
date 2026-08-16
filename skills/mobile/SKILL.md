@@ -1,6 +1,6 @@
 ---
 name: mobile
-description: Send the current Claude Code or Codex task to HTML共有くん for phone review, then wait for approval or follow-up instructions and continue the same task. Use only when the user explicitly invokes /mobile or $mobile, asks to continue from a phone, or asks to stop mobile monitoring.
+description: Send the current Claude Code or Codex task to HTML Share — Tailscale for phone review, then wait for approval or follow-up instructions and continue the same task. Use only when the user explicitly invokes /mobile or $mobile, asks to continue from a phone, or asks to stop mobile monitoring.
 ---
 
 # Mobile handoff
@@ -59,7 +59,7 @@ If none exists, explain that the current client did not expose a resumable sessi
 5. Push one status card. Add separate cards only for genuinely independent decisions. Use at most five cards. Read [review-cards.md](references/review-cards.md) when multiple cards are needed.
 
    ```bash
-   printf '%s' '[{"title":"<task title>","question":"生成結果を確認して、追加の指示があればコメントで返してください。","context":"HTML共有くんの生成結果一覧に状況ページを追加しました。","recommendation":"対応内容を確認してください。"}]' \
+   printf '%s' '[{"title":"<task title>","question":"生成結果を確認して、追加の指示があればコメントで返してください。","context":"HTML Share — Tailscaleの生成結果一覧に状況ページを追加しました。","recommendation":"対応内容を確認してください。"}]' \
      | html-share review push --session "<session-id>"
    ```
 

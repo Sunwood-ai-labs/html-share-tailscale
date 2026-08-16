@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="../brand/html-share-tailscale-mark.svg" alt="HTML共有くんのブランドマーク" width="96">
+  <img src="../brand/html-share-tailscale-mark.svg" alt="HTML Share — Tailscaleのブランドマーク" width="96">
 </p>
 
-# HTML共有くん ドキュメント
+# HTML Share — Tailscale ドキュメント
 
 [English documentation](/) · [日本語README](https://github.com/Sunwood-ai-labs/html-share-tailscale/blob/main/README.ja.md)
 
-HTML共有くんは、Tailscale Serveを入口にするローカル優先のHTMLダッシュボードです。サイトとレビュー状態はホストPCへ保存し、ネットワーク境界はTailnetに置きます。
+HTML Share — Tailscaleは、Tailscale Serveを入口にするローカル優先のHTMLダッシュボードです。サイトとレビュー状態はホストPCへ保存し、ネットワーク境界はTailnetに置きます。
 
 ## ガイド
 

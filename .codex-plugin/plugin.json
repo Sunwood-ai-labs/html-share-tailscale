@@ -12,7 +12,7 @@
   "keywords": ["claude-code", "codex", "html", "mobile", "review", "tailscale", "tailnet"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "HTML共有くん",
+    "displayName": "HTML Share — Tailscale",
     "shortDescription": "Tailscale経由で生成結果をスマホへ安全に共有。",
     "longDescription": "メモや調査結果を見やすいHTMLに整えてローカルへ保存し、Tailscale経由でスマートフォンから確認、承認、追加指示を返せます。",
     "developerName": "Sunwood AI Labs",

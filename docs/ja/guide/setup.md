@@ -2,7 +2,7 @@
 
 [ドキュメント入口](../index.md) · [English](../../guide/setup.md)
 
-HTML共有くんはHTMLとレビュー状態をホストPCへ保存します。Tailscale ServeでTailnet内のHTTPS入口からローカルサーバーへ転送するため、AWSアカウントや外部ホスティングは必要ありません。
+HTML Share — TailscaleはHTMLとレビュー状態をホストPCへ保存します。Tailscale ServeでTailnet内のHTTPS入口からローカルサーバーへ転送するため、AWSアカウントや外部ホスティングは必要ありません。
 
 ## 必要なもの
 

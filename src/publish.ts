@@ -27,8 +27,8 @@ function copyConsole(buildRoot: string, manifest: BuildManifest): void {
     })),
   }, null, 2)}\n`);
   writeFileSync(path.join(consoleRoot, 'app.webmanifest'), `${JSON.stringify({
-    name: 'HTML共有くん',
-    short_name: '共有くん',
+    name: 'HTML Share — Tailscale',
+    short_name: 'HTML Share',
     lang: 'ja',
     start_url: '/app/index.html',
     scope: '/',

@@ -30,7 +30,7 @@ async function stdin(): Promise<string> {
 }
 
 function usage(): never {
-  console.error(`HTML共有くん（ローカル + Tailscale）
+  console.error(`HTML Share — Tailscale（ローカル + Tailscale）
 
 Usage:
   html-share build [--config file]

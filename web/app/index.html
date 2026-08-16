@@ -7,13 +7,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="color-scheme" content="light">
-<title>HTML共有くん</title>
+<title>HTML Share — Tailscale</title>
 <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <!-- Tailscale Serve経由でも、同じオリジンのアプリとしてmanifestを読む -->
 <link rel="manifest" href="/app.webmanifest" crossorigin="use-credentials">
-<meta name="apple-mobile-web-app-title" content="HTML共有くん">
+<meta name="apple-mobile-web-app-title" content="HTML Share">
 <!-- 上バーの上端と同じ色。ここがずれるとステータスバーの周りが継ぎはぎになる -->
 <meta name="theme-color" content="#161C26">
 <!-- 一覧の見た目と描画の正本。スマホの個別ページ側も同じものを読む -->
@@ -987,7 +987,7 @@ body.searching .search {
           <div class="nav-context">
             <button class="brand" id="brand" type="button" title="トップへ戻る">
               <img class="brand-mark" src="/icons/icon-192.png" alt="" width="36" height="36">
-              <span class="brand-copy"><span class="label">HTML共有くん</span><span class="brand-sub">TAILNET CONSOLE</span></span>
+              <span class="brand-copy"><span class="label">HTML Share</span><span class="brand-sub">TAILSCALE EDITION</span></span>
             </button>
             <div class="nav-status" aria-label="共有ページの状態" aria-live="polite">
               <span class="nav-status-label">LIVE</span>
@@ -1274,7 +1274,7 @@ body.searching .search {
   }
 
   async function hidePage(page) {
-    if (!confirm(`「${page.title}」を共有くんの一覧から削除します。\n\n原本と発行済みURLは残り、一覧の末尾の「削除済み」から戻せます。`)) return;
+    if (!confirm(`「${page.title}」をHTML Share — Tailscaleの一覧から削除します。\n\n原本と発行済みURLは残り、一覧の末尾の「削除済み」から戻せます。`)) return;
     const previousHidden = new Set(hiddenSources);
     const previousStarred = new Set(starred);
     hiddenSources.add(page.source);
@@ -1690,12 +1690,12 @@ body.searching .search {
       frame.removeAttribute('src');
       renderHome();
       home.classList.add('on');
-      document.title = 'HTML共有くん';
+      document.title = 'HTML Share — Tailscale';
     } else {
       home.classList.remove('on');
       frame.hidden = false;
       frame.src = current.href;
-      document.title = `${current.title}｜HTML共有くん`;
+      document.title = `${current.title}｜HTML Share — Tailscale`;
       // ブックマークやURL直打ちで開いた場合もここを通るので、未読解除はまとめてここで行う
       markRead(current);
     }
