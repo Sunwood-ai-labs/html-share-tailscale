@@ -102,7 +102,29 @@ export function resolveFromConfig(config: HtmlShareConfig, value: string): strin
   return path.resolve(config.baseDir, value);
 }
 
+function loadEnvironment(): void {
+  const envFile = path.resolve('.env');
+  if (!existsSync(envFile)) return;
+  try {
+    process.loadEnvFile(envFile);
+  } catch (caught: unknown) {
+    throw new Error(`Could not load ${envFile}: ${caught instanceof Error ? caught.message : String(caught)}`);
+  }
+}
+
+function environmentValue(name: string): string | undefined {
+  const value = process.env[name];
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function environmentList(name: string): string[] | undefined {
+  const value = environmentValue(name);
+  if (!value) return undefined;
+  return value.split(',').map((item) => item.trim()).filter(Boolean);
+}
+
 function configPath(file?: string): string {
+  loadEnvironment();
   if (file) return path.resolve(file);
   if (process.env.HTML_SHARE_CONFIG) return path.resolve(process.env.HTML_SHARE_CONFIG);
   const local = path.resolve('html-share.config.yaml');
@@ -112,14 +134,34 @@ function configPath(file?: string): string {
 }
 
 export function loadConfig(file?: string): HtmlShareConfig {
+  loadEnvironment();
   const configFile = configPath(file);
   if (!existsSync(configFile)) {
     throw new Error(`Config file not found: ${configFile}. Copy html-share.config.example.yaml first.`);
   }
   const raw = parse(readFileSync(configFile, 'utf8')) as Record<string, any>;
-  const server = raw?.server ?? {};
-  const tailscale = server?.tailscale ?? {};
-  const content = raw?.content ?? {};
+  const configuredServer = raw?.server ?? {};
+  const configuredTailscale = configuredServer?.tailscale ?? {};
+  const configuredContent = raw?.content ?? {};
+  const server = {
+    ...configuredServer,
+    host: environmentValue('HTML_SHARE_SERVER_HOST') ?? configuredServer.host,
+    port: environmentValue('HTML_SHARE_SERVER_PORT') ?? configuredServer.port,
+    publicUrl: environmentValue('HTML_SHARE_PUBLIC_URL') ?? configuredServer.publicUrl,
+    dataDir: environmentValue('HTML_SHARE_DATA_DIR') ?? configuredServer.dataDir,
+    siteDir: environmentValue('HTML_SHARE_SITE_DIR') ?? configuredServer.siteDir,
+  };
+  const tailscale = {
+    ...configuredTailscale,
+    hostname: environmentValue('HTML_SHARE_TAILSCALE_HOSTNAME') ?? configuredTailscale.hostname,
+    httpsPort: environmentValue('HTML_SHARE_TAILSCALE_HTTPS_PORT') ?? configuredTailscale.httpsPort,
+  };
+  const content = {
+    ...configuredContent,
+    roots: environmentList('HTML_SHARE_CONTENT_ROOTS') ?? configuredContent.roots,
+    maximumShareDays: environmentValue('HTML_SHARE_MAXIMUM_SHARE_DAYS') ?? configuredContent.maximumShareDays,
+    maximumAssetBytes: environmentValue('HTML_SHARE_MAXIMUM_ASSET_BYTES') ?? configuredContent.maximumAssetBytes,
+  };
   const pages = Array.isArray(content.pages) ? content.pages : [];
   const roots = Array.isArray(content.roots) ? content.roots.map((item: unknown) => text(item, 'content.roots[]')) : [];
   if (roots.length === 0) throw new Error('content.roots must contain at least one directory');

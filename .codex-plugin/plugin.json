@@ -1,10 +1,10 @@
 {
-  "name": "html-share",
+  "name": "html-share-tailscale",
   "version": "0.1.0",
   "description": "Create polished HTML, collect it in a self-hosted dashboard, and review AI requests from a phone.",
   "author": {
-    "name": "Minoru Onda",
-    "url": "https://github.com/minorun365"
+    "name": "Sunwood AI Labs",
+    "url": "https://github.com/Sunwood-ai-labs"
   },
   "homepage": "https://github.com/Sunwood-ai-labs/html-share-tailscale#readme",
   "repository": "https://github.com/Sunwood-ai-labs/html-share-tailscale",
@@ -13,9 +13,9 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "HTML共有くん",
-    "shortDescription": "Claude Codeの生成結果をスマホで見やすく共有。",
-    "longDescription": "メモや調査結果を見やすいHTMLに整えてまとめ、スマートフォンから確認し、承認や追加指示をPCの作業へ返せます。",
-    "developerName": "Minoru Onda",
+    "shortDescription": "Tailscale経由で生成結果をスマホへ安全に共有。",
+    "longDescription": "メモや調査結果を見やすいHTMLに整えてローカルへ保存し、Tailscale経由でスマートフォンから確認、承認、追加指示を返せます。",
+    "developerName": "Sunwood AI Labs",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
     "websiteURL": "https://github.com/Sunwood-ai-labs/html-share-tailscale",

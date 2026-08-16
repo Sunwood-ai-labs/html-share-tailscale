@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">HTML Share Tailscale mark</title>
+  <desc id="desc">A vermilion tail sweeping through a geometric torii gateway and cyan network nodes.</desc>
+  <rect width="512" height="512" rx="112" fill="#09111f"/>
+  <path d="M72 392H440" stroke="#182d4a" stroke-width="4"/>
+  <path d="M72 424H440" stroke="#10243d" stroke-width="4"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M72 142 256 84l184 58" stroke="#f1b24d" stroke-width="18"/>
+    <path d="M92 154h328" stroke="#e85a4f" stroke-width="14"/>
+    <path d="M118 166v84M394 166v84" stroke="#e85a4f" stroke-width="18"/>
+
+    <path d="M94 360C154 268 190 176 294 176c80 0 119 61 86 121-30 54-111 50-121-11-6-35 18-61 48-60" stroke="#e85a4f" stroke-width="42"/>
+    <path d="M103 355C163 270 198 188 294 188c67 0 99 48 75 96-21 42-79 40-87-1-4-21 10-38 29-42" stroke="#f1b24d" stroke-width="7"/>
+
+    <path d="M160 322 256 266l96 56M160 322v62M352 322v62M256 266v118" stroke="#79e7ee" stroke-width="10"/>
+  </g>
+
+  <g fill="#79e7ee" stroke="#09111f" stroke-width="7">
+    <circle cx="160" cy="322" r="15"/>
+    <circle cx="256" cy="266" r="15"/>
+    <circle cx="352" cy="322" r="15"/>
+    <circle cx="256" cy="384" r="15"/>
+  </g>
+  <circle cx="256" cy="266" r="5" fill="#09111f"/>
+</svg>

@@ -298,7 +298,7 @@
         <div class="summary-grid">
           <article class="metric"><strong>AWSなし</strong><span>AWS SDK・CDK・S3・CloudFront・Lambda・SSMを通常経路から除去</span></article>
           <article class="metric"><strong>127.0.0.1</strong><span>ローカルサーバーはループバックだけで待ち受け</span></article>
-          <article class="metric"><strong>HTTPS</strong><span>madesk.example.ts.net:9222 をTailscale Serveで使用</span></article>
+          <article class="metric"><strong>HTTPS</strong><span>your-device.example.ts.net:9222 をTailscale Serveで使用</span></article>
         </div>
       </section>
 
@@ -311,7 +311,7 @@
           <li><strong>1. ページ登録</strong><span><code>html-share page add</code> でHTMLファイルを設定に登録します。</span></li>
           <li><strong>2. ローカルへ公開</strong><span><code>html-share publish</code> が <code>.html-share/site</code> と <code>.html-share/data</code> を更新します。</span></li>
           <li><strong>3. サーバー起動</strong><span><code>127.0.0.1:4311</code> のローカルサーバーがダッシュボード、共有ページ、レビューAPIを提供します。</span></li>
-          <li><strong>4. Tailnet内から閲覧</strong><span>Tailscale Serveが <code>https://madesk.example.ts.net:9222</code> でHTTPS終端し、Tailnet内の端末へ届けます。</span></li>
+          <li><strong>4. Tailnet内から閲覧</strong><span>Tailscale Serveが <code>https://your-device.example.ts.net:9222</code> でHTTPS終端し、Tailnet内の端末へ届けます。</span></li>
         </ol>
       </section>
 
@@ -360,8 +360,8 @@
         </ul>
         <div class="callout"><strong>現在の見え方</strong> ダッシュボードの一覧は、設定に登録したHTMLページを表示します。Codexの全スレッド履歴を自動収集する画面ではないため、追加したい成果物は <code>page add</code> で登録してから <code>publish</code> します。</div>
         <div class="links" aria-label="関連ページ">
-          <a class="button-link" href="https://madesk.example.ts.net:9222/app/index.html">ダッシュボードへ戻る</a>
-          <a class="button-link secondary" href="https://madesk.example.ts.net:9222/review/index.html">レビュー画面を開く</a>
+          <a class="button-link" href="https://your-device.example.ts.net:9222/app/index.html">ダッシュボードへ戻る</a>
+          <a class="button-link secondary" href="https://your-device.example.ts.net:9222/review/index.html">レビュー画面を開く</a>
         </div>
       </section>
     </main>

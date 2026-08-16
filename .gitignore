@@ -1,5 +1,7 @@
 node_modules/
 dist/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
 cdk.out/
 .html-share/
 html-share.config.yaml

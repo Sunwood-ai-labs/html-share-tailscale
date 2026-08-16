@@ -29,11 +29,11 @@ test('publishes configured pages and serves local review state', async () => {
   writeFileSync(configFile, `server:
   host: 127.0.0.1
   port: ${port}
-  publicUrl: https://madesk.example.ts.net:9222
+  publicUrl: https://your-device.example.ts.net:9222
   dataDir: .html-share/data
   siteDir: .html-share/site
   tailscale:
-    hostname: madesk.example.ts.net
+    hostname: your-device.example.ts.net
     httpsPort: 9222
 content:
   roots: [pages]
